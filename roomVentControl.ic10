@@ -1,7 +1,0 @@
-#ROOM VENT CONTROL
-
-alias pumpIn d0
-alias pumpOut d1
-alias roomSensor1 d2
-alias roomSensor2 d3
-alias 

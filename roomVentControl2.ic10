@@ -1,22 +1,24 @@
+move r0 0
+move r1 0
 main:
 yield
-l r0 db Setting
-seq r15 r0 4
+l r2 db Setting
+seq r15 r2 4
 beqz r15 if0exit
 s d0 On 0
 s d1 On 0
 sleep 1
 j main
 if0exit:
-l r1 d2 Pressure
-l r2 d3 Pressure
-add r15 r1 r2
-div r3 r15 2
-sgt r15 r3 105
+l r3 d2 Pressure
+l r4 d3 Pressure
+add r15 r3 r4
+div r5 r15 2
+sgt r15 r5 105
 beqz r15 if1exit
 jal Venting
 if1exit:
-slt r15 r3 95
+slt r15 r5 95
 beqz r15 if2else
 jal Pressurizing
 j if2exit
@@ -24,29 +26,43 @@ if2else:
 jal Nominal
 if2exit:
 j main
-jr 86
+jr 89
 CalculateMolsNeeded:
-sub r4 r3 100
-sltz r15 r4
+sub r6 r5 100
+sltz r15 r6
 beqz r15 if3exit
-mul r4 r4 -1
+mul r6 r6 -1
 if3exit:
-l r5 d2 Temperature
-l r6 d3 Temperature
-add r15 r5 r6
-div r7 r15 2
-mul r15 r4 320000
-mul r14 8.31448 r7
-div r8 r15 r14
+l r7 d2 Temperature
+l r8 d3 Temperature
+add r15 r7 r8
+div r9 r15 2
+mul r15 r6 320000
+mul r14 8.31448 r9
+div r10 r15 r14
+j ra
+CheckPipeInPressure:
+l r11 d4 Pressure
+slt r15 r11 100
+beqz r15 if4exit
+jal PauseIn
+if4exit:
+j ra
+CheckPipeOutPressure:
+l r12 d5 Pressure
+slt r15 r12 40000
+beqz r15 if5exit
+jal PauseOut
+if5exit:
 j ra
 Venting:
 jal CheckPipeOutPressure
 s db Setting 3
 jal CalculateMolsNeeded
-mul r15 r8 8.31448
-mul r15 r15 r6
-div r9 r15 r2
-s d1 Setting r9
+mul r15 r10 8.31448
+mul r15 r15 r8
+div r13 r15 r4
+s d1 Setting r13
 s d1 Mode 0
 s d1 On 1
 j ra
@@ -54,17 +70,21 @@ Pressurizing:
 jal CheckPipeInPressure
 s db Setting 2
 jal CalculateMolsNeeded
-l r10 d4 Temperature
-mul r15 r8 8.31448
-mul r15 r15 r10
-div r11 r15 pipeInPressure
-s d0 Setting r11
+l r0 d4 Temperature
+mul r15 r10 8.31448
+mul r15 r15 r0
+div null r15 r11
+s d0 Setting null
 s d0 On 1
 j ra
 Nominal:
 jal CheckPipeInPressure
 jal CheckPipeOutPressure
 s db Setting 1
+l r0 d4 Temperature
+mul r15 r11 200
+mul r14 8.31448 r0
+div r1 r15 r14
 j ra
 PauseIn:
 s db Setting 5
@@ -79,18 +99,4 @@ s d0 On 0
 s d1 On 0
 sleep 1
 j main
-j ra
-CheckPipeInPressure:
-l r12 d4 Pressure
-slt r15 r12 100
-beqz r15 if4exit
-jal PauseIn
-if4exit:
-j ra
-CheckPipeOutPressure:
-l r13 d5 Pressure
-slt r15 r13 40000
-beqz r15 if5exit
-jal PauseOut
-if5exit:
 j ra
