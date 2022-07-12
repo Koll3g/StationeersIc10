@@ -1,0 +1,117 @@
+
+alias pumpIn d0
+alias pumpOut d1
+alias roomSensor1 d2
+alias roomSensor2 d3
+alias pipeInAnalyzer d4
+alias pipeOutAnalyzer d5
+alias stateDb db 
+
+const NOMINAL = 1
+const PRESSURIZING = 2
+const VENTING = 3
+const STOP = 4
+const PAUSEIN = 5
+const PAUSEOUT = 6
+
+const MINPRESSURE = 95
+const NOMINALPRESSURE = 100
+const MAXPRESSURE = 105
+const MINPIPEPRESSURE = 100
+const MAXPIPEPRESSURE = 40000
+const ROOMVOLUME = 5*8*8000
+const R = 8.31448
+
+main:
+    yield
+
+    var state = stateDb.Setting
+    if state == STOP
+        pumpIn.On = 0
+        pumpOut.On = 0
+        sleep 1
+        j main
+    end
+
+    var roomPressure1 = roomSensor1.Pressure
+    var roomPressure2 = roomSensor2.Pressure
+    var avgRoomPressure = (roomPressure1 + roomPressure2) / 2
+
+    if avgRoomPressure > MAXPRESSURE
+        Venting()
+    end
+    if avgRoomPressure < MINPRESSURE
+        Pressurizing()
+    else
+        Nominal()
+    end
+j main
+
+function CalculateMolsNeeded
+    var pressureDiff = avgRoomPressure - NOMINALPRESSURE
+    if pressureDiff < 0
+        pressureDiff = pressureDiff * -1
+    end
+    var roomTemp1 = roomSensor1.Temperature
+    var roomTemp2 = roomSensor2.Temperature
+    var avgRoomTemp = (roomTemp1 + roomTemp2) / 2
+    var mols = (pressureDiff * ROOMVOLUME) / (R * avgRoomTemp)
+end
+
+function Venting
+    CheckPipeOutPressure()
+    stateDb.Setting = VENTING
+    CalculateMolsNeeded()
+    var pumpOutSpeed = (mols * R * roomTemp2) / roomPressure2
+    pumpOut.Setting = pumpOutSpeed
+    pumpOut.Mode = 0
+    pumpOut.On = 1
+end
+
+function Pressurizing
+    CheckPipeInPressure()
+    stateDb.Setting = PRESSURIZING
+    CalculateMolsNeeded()
+    var pipeInTemp = pipeInAnalyzer.Temperature
+    var pumpInSpeed = (mols * R * pipeInTemp) / pipeInPressure
+    pumpIn.Setting = pumpInSpeed
+    pumpIn.On = 1
+end
+
+function Nominal
+    CheckPipeInPressure()
+    CheckPipeOutPressure()
+    
+    stateDb.Setting = NOMINAL
+end
+
+function PauseIn
+    stateDb.Setting = PAUSEIN
+    pumpIn.On = 0
+    pumpOut.On = 0
+    sleep 1
+    j main
+end
+
+function PauseOut
+    stateDb.Setting = PAUSEOUT
+    pumpIn.On = 0
+    pumpOut.On = 0
+    sleep 1
+    j main
+end
+
+function CheckPipeInPressure
+    var pipeInPressure = pipeInAnalyzer.Pressure
+    if pipeInPressure < MINPIPEPRESSURE
+        PauseIn()
+    end
+end
+
+function CheckPipeOutPressure
+    var pipeOutPressure = pipeOutAnalyzer.Pressure
+    if pipeOutPressure < MAXPIPEPRESSURE
+        PauseOut()
+    end
+end
+
