@@ -1,0 +1,96 @@
+main:
+yield
+l r0 db Setting
+seq r15 r0 4
+beqz r15 if0exit
+s d0 On 0
+s d1 On 0
+sleep 1
+j main
+if0exit:
+l r1 d2 Pressure
+l r2 d3 Pressure
+add r15 r1 r2
+div r3 r15 2
+sgt r15 r3 105
+beqz r15 if1exit
+jal Venting
+if1exit:
+slt r15 r3 95
+beqz r15 if2else
+jal Pressurizing
+j if2exit
+if2else:
+jal Nominal
+if2exit:
+j main
+jr 86
+CalculateMolsNeeded:
+sub r4 r3 100
+sltz r15 r4
+beqz r15 if3exit
+mul r4 r4 -1
+if3exit:
+l r5 d2 Temperature
+l r6 d3 Temperature
+add r15 r5 r6
+div r7 r15 2
+mul r15 r4 320000
+mul r14 8.31448 r7
+div r8 r15 r14
+j ra
+Venting:
+jal CheckPipeOutPressure
+s db Setting 3
+jal CalculateMolsNeeded
+mul r15 r8 8.31448
+mul r15 r15 r6
+div r9 r15 r2
+s d1 Setting r9
+s d1 Mode 0
+s d1 On 1
+j ra
+Pressurizing:
+jal CheckPipeInPressure
+s db Setting 2
+jal CalculateMolsNeeded
+l r10 d4 Temperature
+mul r15 r8 8.31448
+mul r15 r15 r10
+div r11 r15 pipeInPressure
+s d0 Setting r11
+s d0 On 1
+j ra
+Nominal:
+jal CheckPipeInPressure
+jal CheckPipeOutPressure
+s db Setting 1
+j ra
+PauseIn:
+s db Setting 5
+s d0 On 0
+s d1 On 0
+sleep 1
+j main
+j ra
+PauseOut:
+s db Setting 6
+s d0 On 0
+s d1 On 0
+sleep 1
+j main
+j ra
+CheckPipeInPressure:
+l r12 d4 Pressure
+slt r15 r12 100
+beqz r15 if4exit
+jal PauseIn
+if4exit:
+j ra
+CheckPipeOutPressure:
+l r13 d5 Pressure
+slt r15 r13 40000
+beqz r15 if5exit
+jal PauseOut
+if5exit:
+j ra
