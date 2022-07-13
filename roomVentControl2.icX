@@ -1,7 +1,9 @@
+use comments
+
 alias pumpIn d0
 alias pumpOut d1
-alias roomSensor1 d2
-alias roomSensor2 d3
+alias roomSensor d2
+alias pipeBeforeOutAnalyzer d3
 alias pipeInAnalyzer d4
 alias pipeOutAnalyzer d5
 alias stateDb db 
@@ -13,17 +15,21 @@ const STOP = 4
 const PAUSEIN = 5
 const PAUSEOUT = 6
 
-const MINPRESSURE = 95
+define MINPRESSURE 95 # kPa
+define ROOMVOLUME 320000 # liters
+
 const NOMINALPRESSURE = 100
 const MAXPRESSURE = 105
 const MINPIPEPRESSURE = 100
 const MAXPIPEPRESSURE = 40000
-const ROOMVOLUME = 5*8*8000
 const R = 8.31448
-const DESIREDFLOW = 40
+const DESIREDFLOW = 40 #! mol/sec
 
-var pipeInTemp = 0
-var maxIntakeMoles = 0
+var pipeInTemp
+var mols
+
+var t1
+var t2
 
 main:
     yield
@@ -36,14 +42,12 @@ main:
         j main
     end
 
-    var roomPressure1 = roomSensor1.Pressure
-    var roomPressure2 = roomSensor2.Pressure
-    var avgRoomPressure = (roomPressure1 + roomPressure2) / 2
+    var roomPressure = roomSensor.Pressure
 
-    if avgRoomPressure > MAXPRESSURE
+    if roomPressure > MAXPRESSURE
         Venting()
     end
-    if avgRoomPressure < MINPRESSURE
+    if roomPressure < MINPRESSURE
         Pressurizing()
     else
         Nominal()
@@ -51,14 +55,12 @@ main:
 j main
 
 function CalculateMolsNeeded
-    var pressureDiff = avgRoomPressure - NOMINALPRESSURE
-    if pressureDiff < 0
-        pressureDiff = pressureDiff * -1
+    t1 = roomPressure - NOMINALPRESSURE #t1 = pressure difference
+    if t1 < 0
+        t1 = t1 * -1
     end
-    var roomTemp1 = roomSensor1.Temperature
-    var roomTemp2 = roomSensor2.Temperature
-    var avgRoomTemp = (roomTemp1 + roomTemp2) / 2
-    var mols = (pressureDiff * ROOMVOLUME) / (R * avgRoomTemp)
+    var roomTemp = roomSensor.Temperature
+    mols = (t1 * ROOMVOLUME) / (R * roomTemp)
 end
 
 function CheckPipeInPressure
@@ -79,7 +81,9 @@ function Venting
     CheckPipeOutPressure()
     stateDb.Setting = VENTING
     CalculateMolsNeeded()
-    var pumpOutSpeed = (mols * R * roomTemp2) / roomPressure2
+    t1 = pipeBeforeOutAnalyzer.Pressure
+    t2 = pipeBeforeOutAnalyzer.Temperature
+    var pumpOutSpeed = (mols * R * t2) / t1
     pumpOut.Setting = pumpOutSpeed
     pumpOut.Mode = 0
     pumpOut.On = 1
@@ -100,7 +104,27 @@ function Nominal
     CheckPipeOutPressure()
     stateDb.Setting = NOMINAL
     pipeInTemp = pipeInAnalyzer.Temperature
-    maxIntakeMoles = (pipeInPressure * 200) / (R * pipeInTemp)
+    var pipeBeforeOutPressure = pipeBeforeOutAnalyzer.Pressure
+    var pipeBeforeOutTemperature = pipeBeforeOutAnalyzer.Temperature
+    t1 = (pipeInPressure * 200) / (R * pipeInTemp) #t1 = maxIntakeMoles
+    t2 = (pipeBeforeOutPressure * 1000) / (R * pipeBeforeOutTemperature) #t2 = maxOutakeMoles
+    
+    if t1 > t2
+        t1 = t2
+    end
+    if t1 > DESIREDFLOW
+        t1 = DESIREDFLOW
+    end
+
+    t2 = (R * t1 * pipeInTemp) / pipeInPressure #pumpSpeed1
+    pumpIn.Setting = t2
+
+    t2 = (R * t1 * pipeBeforeOutTemperature) / pipeBeforeOutPressure #pumpSpeed2
+    pumpOut.Setting = t2
+
+    pumpIn.On = 1
+    pumpOut.Mode = 0
+    pumpOut.On = 0   
 end
 
 function PauseIn

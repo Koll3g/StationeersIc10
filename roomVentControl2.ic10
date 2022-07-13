@@ -1,24 +1,21 @@
-move r0 0
-move r1 0
+define MINPRESSURE 95
+define ROOMVOLUME 320000
 main:
 yield
-l r2 db Setting
-seq r15 r2 4
+l r4 db Setting
+seq r15 r4 4
 beqz r15 if0exit
 s d0 On 0
 s d1 On 0
 sleep 1
 j main
 if0exit:
-l r3 d2 Pressure
-l r4 d3 Pressure
-add r15 r3 r4
-div r5 r15 2
+l r5 d2 Pressure
 sgt r15 r5 105
 beqz r15 if1exit
 jal Venting
 if1exit:
-slt r15 r5 95
+slt r15 r5 MINPRESSURE
 beqz r15 if2else
 jal Pressurizing
 j if2exit
@@ -26,31 +23,28 @@ if2else:
 jal Nominal
 if2exit:
 j main
-jr 89
+jr 115
 CalculateMolsNeeded:
-sub r6 r5 100
-sltz r15 r6
+sub r2 r5 100
+sltz r15 r2
 beqz r15 if3exit
-mul r6 r6 -1
+mul r2 r2 -1
 if3exit:
-l r7 d2 Temperature
-l r8 d3 Temperature
-add r15 r7 r8
-div r9 r15 2
-mul r15 r6 320000
-mul r14 8.31448 r9
-div r10 r15 r14
+l r6 d2 Temperature
+mul r15 r2 ROOMVOLUME
+mul r14 8.31448 r6
+div r1 r15 r14
 j ra
 CheckPipeInPressure:
-l r11 d4 Pressure
-slt r15 r11 100
+l r7 d4 Pressure
+slt r15 r7 100
 beqz r15 if4exit
 jal PauseIn
 if4exit:
 j ra
 CheckPipeOutPressure:
-l r12 d5 Pressure
-slt r15 r12 40000
+l r8 d5 Pressure
+slt r15 r8 40000
 beqz r15 if5exit
 jal PauseOut
 if5exit:
@@ -59,10 +53,12 @@ Venting:
 jal CheckPipeOutPressure
 s db Setting 3
 jal CalculateMolsNeeded
-mul r15 r10 8.31448
-mul r15 r15 r8
-div r13 r15 r4
-s d1 Setting r13
+l r2 d3 Pressure
+l r3 d3 Temperature
+mul r15 r1 8.31448
+mul r15 r15 r3
+div r9 r15 r2
+s d1 Setting r9
 s d1 Mode 0
 s d1 On 1
 j ra
@@ -71,10 +67,10 @@ jal CheckPipeInPressure
 s db Setting 2
 jal CalculateMolsNeeded
 l r0 d4 Temperature
-mul r15 r10 8.31448
+mul r15 r1 8.31448
 mul r15 r15 r0
-div null r15 r11
-s d0 Setting null
+div r10 r15 r7
+s d0 Setting r10
 s d0 On 1
 j ra
 Nominal:
@@ -82,9 +78,33 @@ jal CheckPipeInPressure
 jal CheckPipeOutPressure
 s db Setting 1
 l r0 d4 Temperature
-mul r15 r11 200
+l r11 d3 Pressure
+l r12 d3 Temperature
+mul r15 r7 200
 mul r14 8.31448 r0
-div r1 r15 r14
+div r2 r15 r14
+mul r15 r11 1000
+mul r14 8.31448 r12
+div r3 r15 r14
+sgt r15 r2 r3
+beqz r15 if6exit
+move r2 r3
+if6exit:
+sgt r15 r2 40
+beqz r15 if7exit
+move r2 40
+if7exit:
+mul r15 8.31448 r2
+mul r15 r15 r0
+div r3 r15 r7
+s d0 Setting r3
+mul r15 8.31448 r2
+mul r15 r15 r12
+div r3 r15 r11
+s d1 Setting r3
+s d0 On 1
+s d1 Mode 0
+s d1 On 0
 j ra
 PauseIn:
 s db Setting 5
