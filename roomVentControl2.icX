@@ -21,7 +21,7 @@ const MAXPRESSURE = 105
 const MINPIPEPRESSURE = 100
 const MAXPIPEPRESSURE = 40000
 const R = 8.31448
-const DESIREDFLOW = 40 #! mol/sec
+const DESIREDFLOW = 5 # mol/tick
 
 var pipeInTemp
 var mols
@@ -38,8 +38,9 @@ main:
         pumpOut.On = 0
         sleep 1
         j main
-    else
+    end
         var roomPressure = roomSensor.Setting
+        # var roomPressure = roomSensor.Pressure
 
         if roomPressure > MAXPRESSURE
             Venting()
@@ -49,7 +50,6 @@ main:
         else
             Nominal()
         end
-    end
 j main
 
 function CalculateMolsNeeded
@@ -119,6 +119,8 @@ function Nominal
         t1 = t2
     end
 
+    # t1 = t2
+
     if t1 > DESIREDFLOW
         t1 = DESIREDFLOW
     end
@@ -133,7 +135,7 @@ function Nominal
 
     pumpIn.On = 1
     pumpOut.Mode = 0
-    pumpOut.On = 0   
+    pumpOut.On = 1   
 
     j main
 end
