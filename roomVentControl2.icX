@@ -108,20 +108,27 @@ function Nominal
     pipeInTemp = pipeInAnalyzer.Temperature
     var pipeBeforeOutPressure = pipeBeforeOutAnalyzer.Pressure
     var pipeBeforeOutTemperature = pipeBeforeOutAnalyzer.Temperature
-    t1 = (pipeInPressure * 100) / (R * pipeInTemp) #t1 = maxIntakeMoles
-    t2 = (pipeBeforeOutPressure * 1000) / (R * pipeBeforeOutTemperature) #t2 = maxOutakeMoles
+    #maxIntakeMoles
+    t1 = (pipeInPressure * 100) / (R * pipeInTemp)
+
+    #maxOutakeMoles
+    t2 = (pipeBeforeOutPressure * 1000) / (R * pipeBeforeOutTemperature)
     
+    #maxIntakeMoles > #maxOutakeMoles
     if t1 > t2
         t1 = t2
     end
+
     if t1 > DESIREDFLOW
         t1 = DESIREDFLOW
     end
 
-    t2 = (R * t1 * pipeInTemp) / pipeInPressure #pumpSpeed1
+    #pumpSpeed1    #moles
+    t2 =      (R * t1 * pipeInTemp) / pipeInPressure 
     pumpIn.Setting = t2
-
-    t2 = (R * t1 * pipeBeforeOutTemperature) / pipeBeforeOutPressure #pumpSpeed2
+    
+    #pumpSpeed2   #moles
+    t2 =     (R * t1 * pipeBeforeOutTemperature) / pipeBeforeOutPressure 
     pumpOut.Setting = t2
 
     pumpIn.On = 1
