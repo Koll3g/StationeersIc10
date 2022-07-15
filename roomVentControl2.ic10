@@ -1,37 +1,38 @@
-define MINPRESSURE 95
-define ROOMVOLUME 320000
+j main
 main:
 yield
 l r4 db Setting
 seq r15 r4 4
-beqz r15 if0exit
+beqz r15 if0else
 s d0 On 0
 s d1 On 0
 sleep 1
 j main
-if0exit:
-l r5 d2 Pressure
-sgt r15 r5 105
-beqz r15 if1exit
+j if0exit
+if0else:
+l r5 d2 Setting
+sgt r14 r5 105
+beqz r14 if1exit
 jal Venting
 if1exit:
-slt r15 r5 MINPRESSURE
-beqz r15 if2else
+slt r14 r5 95
+beqz r14 if2else
 jal Pressurizing
 j if2exit
 if2else:
 jal Nominal
 if2exit:
+if0exit:
 j main
-jr 115
+jr 120
 CalculateMolsNeeded:
 sub r2 r5 100
 sltz r15 r2
 beqz r15 if3exit
 mul r2 r2 -1
 if3exit:
-l r6 d2 Temperature
-mul r15 r2 ROOMVOLUME
+l r6 d3 Temperature
+mul r15 r2 64000
 mul r14 8.31448 r6
 div r1 r15 r14
 j ra
@@ -44,7 +45,7 @@ if4exit:
 j ra
 CheckPipeOutPressure:
 l r8 d5 Pressure
-slt r15 r8 40000
+sgt r15 r8 40000
 beqz r15 if5exit
 jal PauseOut
 if5exit:
@@ -61,6 +62,8 @@ div r9 r15 r2
 s d1 Setting r9
 s d1 Mode 0
 s d1 On 1
+s d0 On 0
+j main
 j ra
 Pressurizing:
 jal CheckPipeInPressure
@@ -72,6 +75,8 @@ mul r15 r15 r0
 div r10 r15 r7
 s d0 Setting r10
 s d0 On 1
+s d1 On 0
+j main
 j ra
 Nominal:
 jal CheckPipeInPressure
@@ -80,7 +85,7 @@ s db Setting 1
 l r0 d4 Temperature
 l r11 d3 Pressure
 l r12 d3 Temperature
-mul r15 r7 200
+mul r15 r7 100
 mul r14 8.31448 r0
 div r2 r15 r14
 mul r15 r11 1000
@@ -105,6 +110,7 @@ s d1 Setting r3
 s d0 On 1
 s d1 Mode 0
 s d1 On 0
+j main
 j ra
 PauseIn:
 s db Setting 5

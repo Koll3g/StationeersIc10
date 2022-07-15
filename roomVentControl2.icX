@@ -1,5 +1,3 @@
-use comments
-
 alias pumpIn d0
 alias pumpOut d1
 alias roomSensor d2
@@ -15,8 +13,8 @@ const STOP = 4
 const PAUSEIN = 5
 const PAUSEOUT = 6
 
-define MINPRESSURE 95 # kPa
-define ROOMVOLUME 320000 # liters
+const MINPRESSURE = 95 # kPa
+const ROOMVOLUME = 8000 * 2 * 4# liters
 
 const NOMINALPRESSURE = 100
 const MAXPRESSURE = 105
@@ -30,7 +28,7 @@ var mols
 
 var t1
 var t2
-
+j main
 main:
     yield
 
@@ -40,17 +38,17 @@ main:
         pumpOut.On = 0
         sleep 1
         j main
-    end
-
-    var roomPressure = roomSensor.Pressure
-
-    if roomPressure > MAXPRESSURE
-        Venting()
-    end
-    if roomPressure < MINPRESSURE
-        Pressurizing()
     else
-        Nominal()
+        var roomPressure = roomSensor.Setting
+
+        if roomPressure > MAXPRESSURE
+            Venting()
+        end
+        if roomPressure < MINPRESSURE
+            Pressurizing()
+        else
+            Nominal()
+        end
     end
 j main
 
@@ -59,7 +57,7 @@ function CalculateMolsNeeded
     if t1 < 0
         t1 = t1 * -1
     end
-    var roomTemp = roomSensor.Temperature
+    var roomTemp = pipeBeforeOutAnalyzer.Temperature
     mols = (t1 * ROOMVOLUME) / (R * roomTemp)
 end
 
@@ -72,7 +70,7 @@ end
 
 function CheckPipeOutPressure
     var pipeOutPressure = pipeOutAnalyzer.Pressure
-    if pipeOutPressure < MAXPIPEPRESSURE
+    if pipeOutPressure > MAXPIPEPRESSURE
         PauseOut()
     end
 end
@@ -87,6 +85,8 @@ function Venting
     pumpOut.Setting = pumpOutSpeed
     pumpOut.Mode = 0
     pumpOut.On = 1
+    pumpIn.On = 0
+    j main
 end
 
 function Pressurizing
@@ -97,6 +97,8 @@ function Pressurizing
     var pumpInSpeed = (mols * R * pipeInTemp) / pipeInPressure
     pumpIn.Setting = pumpInSpeed
     pumpIn.On = 1
+    pumpOut.On = 0
+    j main
 end
 
 function Nominal
@@ -106,7 +108,7 @@ function Nominal
     pipeInTemp = pipeInAnalyzer.Temperature
     var pipeBeforeOutPressure = pipeBeforeOutAnalyzer.Pressure
     var pipeBeforeOutTemperature = pipeBeforeOutAnalyzer.Temperature
-    t1 = (pipeInPressure * 200) / (R * pipeInTemp) #t1 = maxIntakeMoles
+    t1 = (pipeInPressure * 100) / (R * pipeInTemp) #t1 = maxIntakeMoles
     t2 = (pipeBeforeOutPressure * 1000) / (R * pipeBeforeOutTemperature) #t2 = maxOutakeMoles
     
     if t1 > t2
@@ -125,6 +127,8 @@ function Nominal
     pumpIn.On = 1
     pumpOut.Mode = 0
     pumpOut.On = 0   
+
+    j main
 end
 
 function PauseIn
