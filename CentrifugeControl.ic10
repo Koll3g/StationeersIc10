@@ -19,7 +19,7 @@ move endOfArray HASH("EndOfArray")
 push HASH("Centrifuge1")
 push HASH("Centrifuge2")
 push endOfArray
-move sp 0
+move sp 1
 
 Main:
 peek listItem
@@ -34,7 +34,7 @@ yield
 j Main
 
 ResetPointer:
-move sp 0
+move sp 1
 j Main
 
 ProcessDevice:
