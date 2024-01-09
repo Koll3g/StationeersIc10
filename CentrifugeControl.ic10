@@ -1,0 +1,64 @@
+
+define CENTRIFUGE 123123
+define MAXQTY 300
+
+alias listItem r9
+
+alias centrifuge r0
+alias quantity r1
+alias isOpen r2
+alias isFull r3
+alias shouldEmpty r4
+alias isClosed r5
+alias isEmpty r6
+alias shouldClose r7
+alias endOfArray r8
+
+move endOfArray HASH("EndOfArray")
+
+push HASH("Centrifuge1")
+push HASH("Centrifuge2")
+push endOfArray
+move sp 0
+
+Main:
+peek listItem
+beq sp listItem endOfArray ResetPointer
+s db Setting sp
+
+move centrifuge listItem
+jal ProcessDevice
+
+add sp sp 1
+yield
+j Main
+
+ResetPointer:
+move sp 0
+j Main
+
+ProcessDevice:
+lbn quantity CENTRIFUGE centrifuge Quantity 0
+lbn isOpen CENTRIFUGE centrifuge Open 0
+
+#IS CENTRIFUGE FULL AND MUST BE EMPTIED?
+seq isClosed isOpen 0
+sge isFull quantity MAXQTY
+and shouldEmpty isFull isClosed
+beq shouldEmpty 1 Empty
+
+#IS CENTRIFUGE EMPTY AND MUST BE CLOSED?
+seq isEmpty quantity 0
+and shouldClose isEmpty isOpen
+beq shouldClose 1 Close
+
+j ra
+
+Empty:
+sbn CENTRIFUGE centrifuge Open 1
+j ra
+
+Close:
+sbn CENTRIFUGE centrifuge Open 0
+j ra
+
