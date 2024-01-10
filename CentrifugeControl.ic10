@@ -1,0 +1,97 @@
+
+#d0 578182956 #set device hash
+
+define CENTRIFUGE 123123
+define MAXQTY 400
+
+alias centrifuge r15
+alias quantity r14
+alias isOpen r13
+alias isFull r12
+alias shouldEmpty r11
+alias isClosed r10
+alias isEmpty r9
+alias shouldClose r8
+alias endOfArray r7
+
+alias Centrifuge d0
+
+move endOfArray HASH("EndOfArray")
+
+push 1
+
+push HASH("Centrifuge1") 
+push HASH("Centrifuge2")
+push HASH("Centrifuge3")
+push HASH("Centrifuge4")
+push HASH("Centrifuge5")
+push HASH("Centrifuge6")
+push HASH("Centrifuge7")
+push HASH("Centrifuge8")
+push HASH("Centrifuge9")
+push HASH("Centrifuge10")
+push HASH("Centrifuge11")
+push HASH("Centrifuge12")
+push HASH("Centrifuge13")
+push HASH("Centrifuge14")
+push HASH("Centrifuge15")
+push HASH("Centrifuge16")
+push endOfArray
+move sp 1
+
+Main:
+peek centrifuge
+beq centrifuge endOfArray ResetPointer
+
+jal ProcessDevice
+
+jal ReportState
+
+add sp sp 1
+
+sleep 1
+j Main
+
+ResetPointer:
+move sp 1
+j Main
+
+ProcessDevice:
+lbn quantity CENTRIFUGE centrifuge Quantity 0
+lbn isOpen CENTRIFUGE centrifuge Open 0
+
+#IS CENTRIFUGE FULL AND MUST BE EMPTIED?
+seq isClosed isOpen 0
+sge isFull quantity MAXQTY
+and shouldEmpty isFull isClosed
+beq shouldEmpty 1 Empty
+
+#IS CENTRIFUGE EMPTY AND MUST BE CLOSED?
+slt isEmpty quantity 1
+and shouldClose isEmpty isOpen
+beq shouldClose 1 Close
+
+j ra
+
+Empty:
+sbn CENTRIFUGE centrifuge Open 1
+j ra
+
+Close:
+sbn CENTRIFUGE centrifuge Open 0
+j ra
+
+EmptyStack:
+move sp 1
+Loop:
+push 0
+ble sp 512 Loop
+j ra
+
+ReportState:
+div r0 quantity 1000
+mul r1 sp 10
+add r0 r0 r1
+add r0 r0 isOpen
+s db Setting r0
+j ra

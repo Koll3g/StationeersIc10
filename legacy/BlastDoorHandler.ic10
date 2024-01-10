@@ -1,0 +1,21 @@
+# BlastDoorHandler
+alias blastDoorLever d0
+alias tempSensor d1
+alias blastDoorStateMemory d2
+
+Loop:
+l r0 blastDoorLever Setting
+beq r0 1 OpenBlastDoors
+l r1 tempSensor Temperature
+sub r1 r1 273
+bgt r1 75 OpenBlastDoors
+blt r1 30 CloseBlastDoors
+j Loop
+
+OpenBlastDoors:
+s blastDoorStateMemory Setting 1
+j Loop
+
+CloseBlastDoors:
+s blastDoorStateMemory Setting 0
+j Loop
