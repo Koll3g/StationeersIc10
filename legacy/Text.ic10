@@ -1,0 +1,10 @@
+<Filter1>.<Filter2>
+RUNNING 1
+STANDBY 2
+EMPTY 3
+FLUSHING 4
+PAUSE-IN 5
+PAUSE-OUT 6
+
+Filter 1
+Press Button after Filters were replaced

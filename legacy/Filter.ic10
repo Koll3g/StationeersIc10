@@ -1,0 +1,87 @@
+alias filtration1 d0
+alias outputSensor1 d1
+alias volumePump1 d2
+alias filtration2 d3
+alias outputSensor2 d4
+alias volumePump2 d5
+alias filterWarning db
+
+alias sensor1Reading1 r0
+alias sensor1Reading2 r1
+alias currentActiveFilter r2
+alias sensor2Reading1 r3
+alias sensor2Reading2 r4
+alias sensor1Pressure r5
+alias sensor2Pressure r6
+
+move currentActiveFilter 1
+
+Start:
+beq currentActiveFilter 1 Filter1Active
+beq currentActiveFilter 2 Filter2Active
+
+Filter1Active:
+l sensor1Reading1 outputSensor1 RatioVolatiles
+bgt sensor1Reading1 0 FilterEmpty1
+l sensor1Reading2 outputSensor1 RatioCarbonDioxide
+bgt sensor1Reading2 0 FilterEmpty1
+
+s filtration1 On 1
+l sensor1Pressure outputSensor1 Pressure
+bgt sensor1Pressure 1000000 TurnPump1On
+s volumePump2 On 0
+j CheckFilter2
+
+Filter2Active:
+l sensor2Reading1 outputSensor2 RatioVolatiles
+bgt sensor2Reading1 0 FilterEmpty2
+l sensor2Reading2 outputSensor2 RatioCarbonDioxide
+bgt sensor2Reading2 0 FilterEmpty2
+
+s filtration2 On 1
+l sensor2Pressure outputSensor2 Pressure
+bgt sensor2Pressure 1000000 TurnPump2On
+s volumePump1 On 0
+j CheckFilter1
+
+TurnPump1On:
+s volumePump1 Setting 100
+s volumePump1 On 1
+j CheckFilter2
+
+FilterEmpty1:
+s filtration1 On 0
+s volumePump1 On 0
+s filterWarning Setting 1
+move currentActiveFilter 2
+j Start
+
+TurnPump2On:
+s volumePump1 Setting 100
+s volumePump1 On 1
+j CheckFilter1
+
+FilterEmpty2:
+s filtration2 On 0
+s volumePump2 On 0
+s filterWarning Setting 1
+move currentActiveFilter 1
+j Start
+
+CheckFilter2:
+l sensor2Reading1 outputSensor2 RatioVolatiles
+l sensor2Reading2 outputSensor2 RatioCarbonDioxide
+add r15 sensor2Reading1 sensor2Reading2
+beq r15 0 SetWarningZero
+j Start
+
+CheckFilter1:
+l sensor1Reading1 outputSensor1 RatioVolatiles
+l sensor1Reading2 outputSensor1 RatioCarbonDioxide
+add r14 sensor1Reading1 sensor2Reading1
+beq r14 0 SetWarningZero
+j Start
+
+SetWarningZero:
+s filterWarning Setting 0
+j Start

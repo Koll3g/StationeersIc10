@@ -1,0 +1,104 @@
+#FILTER WARNING AND EXHAUST OVERPRESSURE CONTROL
+
+alias ic1 d0
+alias ic2 d1
+alias analyzerIn d2
+alias lamp d3
+alias display d4
+alias analyzerOut d5
+
+alias state1 r0
+alias state2 r3
+alias switchPressed r1
+alias pressure r2
+alias displayValue r4
+alias pause r5
+
+define RUNNING 1
+define STANDBY 2
+define EMPTY 3
+define FLUSHING 4
+define PAUSE-IN 5
+define PAUSE-OUT 6
+
+define MAXPRESSURE 5000
+define MINPRESSURE 200
+
+Start:
+move pause 0
+l state1 ic1 Setting
+beqal state1 EMPTY Filter1Empty
+bneal state1 EMPTY LampOff
+l state2 ic2 Setting
+beqal state2 EMPTY Filter2Empty
+bneal state2 EMPTY LampOff
+s analyzerIn On 1
+s analyzerOut On 1
+l pressure analyzerOut Pressure
+bgtal pressure MAXPRESSURE PauseOut
+l pressure analyzerIn Pressure
+bgtal MINPRESSURE pressure PauseIn
+beqal pause 0 Continue
+
+div state2 state2 10
+add displayValue state1 state2
+s display Setting displayValue
+
+yield
+j Start
+
+Filter1Empty:
+s lamp On 1
+j ra
+
+Filter2Empty:
+s lamp On 1
+j ra
+
+PauseIn:
+move pause 1
+beq state1 RUNNING Pause1In
+beq state2 RUNNING Pause2In
+j ra
+
+PauseOut:
+move pause 1
+beq state1 RUNNING Pause1Out
+beq state2 RUNNING Pause2Out
+j ra
+
+Pause1In:
+s ic1 Setting PAUSE-IN
+j ra
+
+Pause2In:
+s ic2 Setting PAUSE-IN
+j ra
+
+Pause1Out:
+s ic1 Setting PAUSE-OUT
+j ra
+
+Pause2Out:
+s ic2 Setting PAUSE-OUT
+j ra
+
+
+Continue:
+beq state1 PAUSE-IN Continue1
+beq state2 PAUSE-IN Continue2
+beq state1 PAUSE-OUT Continue1
+beq state2 PAUSE-OUT Continue2
+j ra
+
+Continue1:
+s ic1 Setting RUNNING
+j ra
+
+Continue2:
+s ic2 Setting RUNNING
+j ra
+
+LampOff:
+s lamp On 0
+j ra

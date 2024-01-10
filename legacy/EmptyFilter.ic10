@@ -1,0 +1,41 @@
+alias volumePump d0
+alias valve d1
+alias turboPump d2
+alias button d3
+alias lamp d4
+alias mainIc d5
+
+alias buttonPressed r0
+alias filterWarning r1
+
+define filterNumber 1
+ 
+Start:
+l filterWarning mainIc Setting
+beqal filterWarning filterNumber WarningLampOn
+l buttonPressed button Setting
+beq buttonPressed 1 ButtonPressed
+yield
+j Start
+
+ButtonPressed:
+beq filterWarning filterNumber FilterEmpty
+yield
+j Start
+
+WarningLampOn:
+s lamp On 1
+j ra
+
+FilterEmpty:
+s valve On 0
+s volumePump Setting 100
+s turboPump Setting 1000
+s volumePump On 1
+s turboPump On 1
+sleep 1
+s valve On 1
+s volumePump On 0
+s turboPump On 0
+s lamp On 0
+j Start

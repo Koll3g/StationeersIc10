@@ -1,0 +1,106 @@
+#FILTRATION STATE MACHINE
+
+alias volumePump d0
+alias button d1
+alias flushPump d2
+alias analyzer d3
+alias filtration d4
+alias otherIc d5
+alias state db
+
+alias currentState r0
+alias buttonPressed r1
+alias sensorReading1 r2
+alias sensorReading2 r3
+alias otherIcState r4
+alias pressure r5
+
+define RUNNING 1
+define STANDBY 2
+define EMPTY 3
+define FLUSHING 4
+define PAUSE-IN 5
+define PAUSE-OUT 6
+
+s state Setting EMPTY
+
+Start:
+yield
+
+l currentState state Setting
+s analyzer On 1
+beq currentState EMPTY Empty
+beq currentState FLUSHING Flushing
+beq currentState PAUSE-IN Pause
+beq currentState PAUSE-OUT Pause
+beq currentState STANDBY StandBy
+beq currentState RUNNING Running
+
+j Start
+
+Empty:
+l buttonPressed button Setting
+beq buttonPressed 1 ExitEmpty
+j Start
+ExitEmpty:
+s state Setting FLUSHING
+j Start
+
+Flushing:
+s volumePump On 0
+s flushPump Mode 0
+s flushPump Setting 1000
+s flushPump On 1
+l pressure analyzer Pressure
+beq pressure 0 ExitFlushing
+j Start
+ExitFlushing:
+s flushPump On 0
+s volumePump On 0
+s state Setting STANDBY
+sleep 1
+j Start
+
+Pause:
+s filtration On 0
+s volumePump On 0
+j Start
+
+StandBy:
+s flushPump On 0
+l otherIcState otherIc Setting
+beq otherIcState EMPTY ExitStandBy
+l buttonPressed button Setting
+beq buttonPressed 1 ExitStandByButton
+j Start
+ExitStandBy:
+s state Setting RUNNING
+j Start
+ExitStandByButton:
+l otherIcState otherIc Setting
+beq otherIcState STANDBY ExitStandBy
+beq otherIcState EMPTY ExitStandBy
+j Start
+
+Running:
+s flushPump On 0
+s filtration On 1
+s volumePump Setting 100
+s volumePump On 1
+l sensorReading1 analyzer RatioCarbonDioxide
+l sensorReading2 analyzer RatioPollutant
+bgt sensorReading1 0 ExitRunning
+bgt sensorReading2 0 ExitRunning
+l sensorReading1 analyzer Pressure
+j Start
+ExitRunning:
+s filtration On 0
+s volumePump On 0
+s state Setting EMPTY
+j Start
+
+Unlock:
+s volumePump Lock 0
+s flushPump Lock 0
+s analyzer Lock 0
+j Start
