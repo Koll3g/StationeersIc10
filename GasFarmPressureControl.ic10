@@ -1,0 +1,53 @@
+define PIPEANALYZER 1234
+define tPUMP 1234
+
+define MAXPRESSURE 20000
+
+alias listItem r15
+alias endOfArray r14
+alias pump r13
+alias pipeAnalyzer r12
+alias pressure r11
+alias pumpOn r10
+
+move endOfArray HASH("EndOfArray")
+
+push HASH("pipeAnalyzer1")
+push HASH("pump1")
+push HASH("pipeAnalyzer2")
+push HASH("pump2")
+push endOfArray
+move sp 1
+
+Main:
+move pump 0
+move pipeAnalyzer 0
+
+peek listItem
+beq listItem endOfArray ResetPointer
+move pipeAnalyzer listItem
+
+add sp sp 1
+
+peek listItem
+beq sp listItem endOfArray ResetPointer
+move pump listItem
+
+jal ProcessDevice
+
+add sp sp 1
+s db Setting sp
+
+yield
+j Main
+
+ResetPointer:
+move sp 1
+j Main
+
+ProcessDevice:
+lbn pressure PIPEANALYZER pipeAnalyzer Pressure 0
+sle pumpOn pressure MAXPRESSURE
+s pump On pumpOn
+
+j ra

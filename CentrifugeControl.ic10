@@ -1,36 +1,49 @@
 
 define CENTRIFUGE 123123
-define MAXQTY 300
+define MAXQTY 400
 
-alias listItem r9
-
-alias centrifuge r0
-alias quantity r1
-alias isOpen r2
-alias isFull r3
-alias shouldEmpty r4
-alias isClosed r5
-alias isEmpty r6
-alias shouldClose r7
-alias endOfArray r8
+alias centrifuge r15
+alias quantity r14
+alias isOpen r13
+alias isFull r12
+alias shouldEmpty r11
+alias isClosed r10
+alias isEmpty r9
+alias shouldClose r8
+alias endOfArray r7
 
 move endOfArray HASH("EndOfArray")
 
 push HASH("Centrifuge1")
 push HASH("Centrifuge2")
+push HASH("Centrifuge3")
+push HASH("Centrifuge4")
+push HASH("Centrifuge5")
+push HASH("Centrifuge6")
+push HASH("Centrifuge7")
+push HASH("Centrifuge8")
+push HASH("Centrifuge9")
+push HASH("Centrifuge10")
+push HASH("Centrifuge11")
+push HASH("Centrifuge12")
+push HASH("Centrifuge13")
+push HASH("Centrifuge14")
+push HASH("Centrifuge15")
+push HASH("Centrifuge16")
 push endOfArray
 move sp 1
 
 Main:
-peek listItem
-beq sp listItem endOfArray ResetPointer
-s db Setting sp
+peek centrifuge
+beq centrifuge endOfArray ResetPointer
 
-move centrifuge listItem
 jal ProcessDevice
 
+jal ReportState
+
 add sp sp 1
-yield
+
+sleep 1
 j Main
 
 ResetPointer:
@@ -43,7 +56,7 @@ lbn isOpen CENTRIFUGE centrifuge Open 0
 
 #IS CENTRIFUGE FULL AND MUST BE EMPTIED?
 seq isClosed isOpen 0
-sge isFull quantity MAXQTY
+seq isFull quantity MAXQTY
 and shouldEmpty isFull isClosed
 beq shouldEmpty 1 Empty
 
@@ -62,3 +75,16 @@ Close:
 sbn CENTRIFUGE centrifuge Open 0
 j ra
 
+EmptyStack:
+move sp 1
+push 0
+ble sp 512 EmptyStack
+j ra
+
+ReportState:
+div r0 quantity 1000
+mul r1 sp 10
+add r0 r0 r1
+add r0 r0 isOpen
+s db Setting r0
+j ra
