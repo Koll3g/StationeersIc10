@@ -1,8 +1,5 @@
-
-#d0 578182956 #set device hash
-
-define CENTRIFUGE 123123
-define MAXQTY 400
+define CENTRIFUGE 690945935
+define MAXQTY 399
 
 alias centrifuge r15
 alias quantity r14
@@ -14,13 +11,9 @@ alias isEmpty r9
 alias shouldClose r8
 alias endOfArray r7
 
-alias Centrifuge d0
-
 move endOfArray HASH("EndOfArray")
 
-push 1
-
-push HASH("Centrifuge1") 
+push HASH("Centrifuge1")
 push HASH("Centrifuge2")
 push HASH("Centrifuge3")
 push HASH("Centrifuge4")
@@ -57,12 +50,12 @@ move sp 1
 j Main
 
 ProcessDevice:
-lbn quantity CENTRIFUGE centrifuge Quantity 0
+lbn quantity CENTRIFUGE centrifuge Reagents 0
 lbn isOpen CENTRIFUGE centrifuge Open 0
 
 #IS CENTRIFUGE FULL AND MUST BE EMPTIED?
 seq isClosed isOpen 0
-sge isFull quantity MAXQTY
+sgt isFull quantity MAXQTY
 and shouldEmpty isFull isClosed
 beq shouldEmpty 1 Empty
 
@@ -89,6 +82,7 @@ ble sp 512 Loop
 j ra
 
 ReportState:
+lbn isOpen CENTRIFUGE centrifuge Open 0
 div r0 quantity 1000
 mul r1 sp 10
 add r0 r0 r1
