@@ -1,0 +1,93 @@
+# read cur temperature
+alias coolantSensor d0
+alias coolPump d1
+alias hotPump d3
+alias Status db
+
+define DESIREDTEMP 293
+define MINTEMP 288
+define MAXTEMP 298
+define MINPRESSURE 2000
+
+alias coolantPressure r0
+alias coolantTemp r1
+
+alias lastCoolantTemp r2
+alias lastCoolPumpSpd r3
+alias lastHotPumpSpd r4
+
+alias hotPumpSpd r5
+alias coolPumpSpd r6
+
+jal HeatReset
+jal CoolReset
+
+Main: 
+
+move coolantTemp lastCoolantTemp
+
+l coolantPressure coolantSensor Pressure
+l coolantTemp coolantSensor Temperature
+
+# if pressure too low, fill
+bgt MINPRESSURE coolantPressure Fill
+
+# if temperature not ok, cool or hot
+bgt coolantTemp MAXTEMP Cool
+bgt MINTEMP coolantTemp Heat
+
+# temp and pressure seems to be ok - reset pumps
+jal HeatReset
+jal CoolReset
+j Main
+
+
+Heat:
+jal CoolReset
+
+sub hotPumpSpd DESIREDTEMP coolantTemp 
+s hotPump Setting hotPumpSpd
+s hotPump On 1
+
+j Main
+
+Cool:
+jal HeatReset
+
+sub coolPumpSpd coolantTemp DESIREDTEMP 
+s Status Setting coolPumpSpd
+s coolPump Setting coolPumpSpd
+s coolPump On 1
+
+j Main
+
+Fill:
+bge DESIREDTEMP coolantTemp HeatFill
+bge coolantTemp DESIREDTEMP CoolFill
+j Main
+
+HeatFill:
+jal CoolReset
+s hotPump Setting 20
+s hotPump On 1
+j Main
+
+CoolFill:
+jal HeatReset
+s coolPump Setting 20
+s coolPump On 1
+j Main
+
+HeatReset:
+move hotPumpSpd 0
+s hotPump On 0
+s hotPump Setting 0
+
+j ra
+
+CoolReset:
+move coolPumpSpd 0
+s coolPump On 0
+s coolPump Setting 0
+
+j ra

@@ -1,0 +1,24 @@
+alias pressureOutReader d0
+alias pressureOut2Reader d1
+alias filtration db
+
+define MAXPRESSURE 40000
+
+alias pressureOut r0
+
+Main:
+l pressureOut pressureOutReader Setting
+bge pressureOut MAXPRESSURE Stop 
+
+l pressureOut pressureOut2Reader Setting
+bge pressureOut MAXPRESSURE Stop 
+
+s filtration Mode 1
+
+yield
+j Main
+
+Stop:
+s filtration Mode 0
+yield
+j Main

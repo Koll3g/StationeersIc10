@@ -1,0 +1,92 @@
+# AUTO DEVICE TURN OFF WHEN INACTIVE
+
+alias dev1 d0
+alias dev2 d1
+alias dev3 d2
+alias stack1 d3
+alias stack2 d4
+alias stack3 d5
+
+alias isDev1On r0
+alias isDev2On r1
+alias isDev3On r2
+
+alias isDev1Active r3
+alias isDev2Active r4
+alias isDev3Active r5
+
+alias dev1Counter r6
+alias dev2Counter r7
+alias dev3Counter r8
+
+define MAXINACTIVITY 60
+
+Main:
+l isDev1On dev1 On
+l isDev2On dev2 On
+l isDev3On dev3 On
+
+beqal isDev1On 1 Dev1On
+beqal isDev2On 1 Dev2On
+beqal isDev3On 1 Dev3On
+
+beqal isDev1On 0 ResetDev1Counter
+beqal isDev2On 0 ResetDev2Counter
+beqal isDev3On 0 ResetDev3Counter
+
+sleep 1
+j Main
+
+Dev1On:
+s stack1 On 1
+l isDev1Active dev1 Activate
+beq isDev1Active 1 ResetDev1Counter
+bgt dev1Counter MAXINACTIVITY TurnDev1Off
+add dev1Counter dev1Counter 1
+j ra
+
+Dev2On:
+s stack2 On 1
+l isDev2Active dev2 Activate
+beq isDev2Active 1 ResetDev2Counter
+bgt dev2Counter MAXINACTIVITY TurnDev2Off
+add dev2Counter dev2Counter 1
+j ra
+
+Dev3On:
+s stack3 On 1
+l isDev3Active dev3 Activate
+beq isDev3Active 1 ResetDev3Counter
+bgt dev3Counter MAXINACTIVITY TurnDev3Off
+add dev3Counter dev3Counter 1
+j ra
+
+ResetDev1Counter:
+move dev1Counter 0
+j ra
+
+ResetDev2Counter:
+move dev2Counter 0
+j ra
+
+ResetDev3Counter:
+move dev3Counter 0
+j ra
+
+TurnDev1Off:
+s dev1 On 0
+s stack1 On 0
+j ResetDev1Counter
+
+TurnDev2Off:
+s dev2 On 0
+s stack2 On 0
+j ResetDev1Counter
+
+TurnDev3Off:
+s dev3 On 0
+s stack3 On 0
+j ResetDev1Counter
+
+
+

@@ -1,0 +1,63 @@
+# Atmosphere Sucker
+
+alias outsideSensor d0
+alias clntSensor d1
+alias co2Sensor d2
+alias pumpClnt d3
+alias pumpCo2 d4
+alias vents db
+
+alias outsideTemp r0
+alias co2Pressure r1
+alias clntPressure r2
+alias produceClnt r3
+alias pressureOk r4
+alias tempOk r5
+alias produceCo2 r6
+
+define MAXPRESSURE 40000
+define MAXCLNTTEMP 213
+define MINCO2TEMP 283
+
+Main:
+l outsideTemp outsideSensor Temperature
+l clntPressure clntSensor Pressure
+l co2Pressure co2Sensor Pressure
+
+sle tempOk outsideTemp MAXCLNTTEMP
+sle pressureOk clntPressure MAXPRESSURE
+and produceClnt tempOk pressureOk
+beq produceClnt 1 ProduceCoolant
+
+sge tempOk outsideTemp MINCO2TEMP
+sle pressureOk co2Pressure MAXPRESSURE
+and produceCo2 pressureOk tempOk
+beq produceCo2 1 ProduceCo2
+
+s vents Setting 0
+
+sleep 30
+s pumpCo2 On 0
+s pumpClnt On 0
+
+yield
+j Main
+
+ProduceCoolant:
+s pumpCo2 On 0
+s vents Setting 1
+s pumpClnt Setting 100
+s pumpClnt On 1
+
+yield
+j Main
+
+ProduceCo2:
+s pumpClnt On 0
+s vents Setting 1
+s pumpCo2 Setting 100
+s pumpCo2 On 1
+
+yield
+j Main
+

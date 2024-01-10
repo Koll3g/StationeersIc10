@@ -1,3 +1,5 @@
+define MINPRESSURE 95
+define ROOMVOLUME 64000
 j main
 main:
 yield
@@ -14,7 +16,7 @@ sgt r15 r5 105
 beqz r15 if1exit
 jal Venting
 if1exit:
-slt r15 r5 95
+slt r15 r5 MINPRESSURE
 beqz r15 if2else
 jal Pressurizing
 j if2exit
@@ -22,7 +24,7 @@ if2else:
 jal Nominal
 if2exit:
 j main
-jr 120
+jr 122
 CalculateMolsNeeded:
 sub r2 r5 100
 sltz r15 r2
@@ -30,7 +32,7 @@ beqz r15 if3exit
 mul r2 r2 -1
 if3exit:
 l r6 d3 Temperature
-mul r15 r2 64000
+mul r15 r2 ROOMVOLUME
 mul r14 8.31448 r6
 div r1 r15 r14
 j ra
@@ -86,16 +88,18 @@ l r12 d3 Temperature
 mul r15 r7 100
 mul r14 8.31448 r0
 div r2 r15 r14
-mul r15 r11 1000
+mul r15 r11 900
 mul r14 8.31448 r12
 div r3 r15 r14
 sgt r15 r2 r3
 beqz r15 if6exit
 move r2 r3
 if6exit:
-sgt r15 r2 5
+mul r15 100 ROOMVOLUME
+div r3 r15 8859909.888
+sgt r15 r2 r3
 beqz r15 if7exit
-move r2 5
+move r2 r3
 if7exit:
 mul r15 8.31448 r2
 mul r15 r15 r0

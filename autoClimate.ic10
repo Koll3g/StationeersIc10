@@ -1,0 +1,47 @@
+#AIRCON COOLANT PIPE MANAGEMENT
+
+alias aircon db 
+alias pressureValves d0
+alias outsideSensor d1
+
+alias coolantPipeTemp r0
+alias coolantPipePressure r1
+alias outsideTemp r2
+
+define MINTEMP 19
+define MAXTEMP 21
+define DESIREDPRESSURE 3900
+define MINFILLTEMP 15
+
+Main:
+l coolantPipeTemp aircon Pipe2Temp
+l outsideTemp outsideSensor Temperature 
+
+bgt MINTEMP coolantPipeTemp Heat
+bgt MAXTEMP coolantPipeTemp Cool
+
+j FillPipe
+
+Heat:
+bgt outsideTemp coolantPipeTemp OpenValve
+j CloseValve
+
+Cool:
+bgt coolantPipeTemp outsideTemp OpenValve
+j CloseValve
+
+OpenValve:
+s pressureValves Open 1
+yield
+j Main
+
+CloseValve:
+s pressureValves Open 0
+yield
+j Main
+
+FillPipe:
+l coolantPipePressure aircon Pipe2Pressure
+bgt coolantPipePressure DESIREDPRESSURE CloseValve
+bgt coolantPipeTemp MINFILLTEMP CloseValve
+j OpenValve

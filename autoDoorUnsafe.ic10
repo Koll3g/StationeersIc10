@@ -1,0 +1,103 @@
+alias door d0
+alias sensors d1
+alias disableGasCheck d2
+alias gasIn d3
+alias buttons d4
+alias safeDoor d5
+
+define MAXPRESSURE 50
+define MINPRESSURE 30
+define MAXVOLATILES 0.01
+define MAXNITROUS 0.01
+define MAXCO2 0.1
+define MAXPOL 0.01
+
+alias risky r15
+alias sensorActive r13
+
+s door Open 0
+sleep 1
+s safeDoor Open 1
+
+Main:
+
+jal CheckGas
+s db Setting risky
+
+l r14 buttons PrefabHash
+lb r0 r14 Activate Sum
+bgeal r0 1 OpenSafeDoor
+
+l r14 sensors PrefabHash
+lb sensorActive r14 Activate Sum
+
+beq risky 1 RiskyAtmo
+
+bge sensorActive 1 SensorActiveSafe
+s door Open 0
+j Main
+
+CheckGas:
+l r0 disableGasCheck Open
+beq r0 1 DisableGasCheck
+
+l r0 gasIn Pressure
+bge r0 MAXPRESSURE RiskyAtmoDet
+#bge MINPRESSURE r0 RiskyAtmoDet
+l r0 gasIn RatioVolatiles
+bge r0 MAXVOLATILES RiskyAtmoDet
+l r0 gasIn RatioPollutant
+bge r0 MAXPOL RiskyAtmoDet
+l r0 gasIn RatioNitrousOxide
+bge r0 MAXNITROUS RiskyAtmoDet
+l r0 gasIn RatioCarbonDioxide
+#bge r0 MAXCO2 RiskyAtmoDet
+move risky 0
+s safeDoor Open 1
+j ra
+
+DisableGasCheck:
+move risky 0
+s safeDoor Open 1
+j ra
+
+RiskyAtmoDet:
+move risky 1
+s safeDoor Open 0
+j ra
+
+RiskyAtmo:
+bge sensorActive 1 SensorActiveRisky
+
+s door Open 0
+
+j Main
+
+SensorActiveSafe:
+s door Open 1
+j Main
+
+SensorActiveRisky:
+l r0 safeDoor Open
+beq r0 1 CloseSafeDoor
+s door Open 1
+j Main
+
+OpenSafeDoor:
+l r0 door Open
+beq r0 1 CloseDoor
+s safeDoor Open 1
+sleep 1
+s safeDoor Open 0
+sleep 1
+j ra
+
+CloseDoor:
+s door Open 0
+sleep 1
+j OpenSafeDoor
+
+CloseSafeDoor:
+s safeDoor Open 0
+sleep 1
+j SensorActiveRisky

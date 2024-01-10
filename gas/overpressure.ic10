@@ -1,0 +1,34 @@
+alias tank1 d0
+alias tank2 d1
+alias tank3 d2
+alias pump1 d3
+alias pump2 d4
+alias pump3 d5
+
+alias currentPressure1 r0
+alias currentPressure2 r1
+alias currentPressure3 r2
+alias pump1On r3
+alias pump2On r4
+alias pump3On r5
+
+define MAXPRESSURE 52000
+
+Main:
+l currentPressure1 tank1 Pressure
+l currentPressure2 tank2 Pressure
+l currentPressure3 tank3 Pressure
+
+sgt pump1On currentPressure1 MAXPRESSURE
+sgt pump2On currentPressure2 MAXPRESSURE
+sgt pump3On currentPressure3 MAXPRESSURE
+
+s pump1 Setting 100
+s pump2 Setting 100
+s pump3 Setting 100
+
+s pump1 On pump1On
+s pump2 On pump2On
+s pump3 On pump3On
+
+j Main

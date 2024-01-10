@@ -13,15 +13,15 @@ const STOP = 4
 const PAUSEIN = 5
 const PAUSEOUT = 6
 
-const MINPRESSURE = 95 # kPa
-const ROOMVOLUME = 8000 * 2 * 4# liters
+define MINPRESSURE 95 # kPa
+define ROOMVOLUME 64000# liters
 
 const NOMINALPRESSURE = 100
 const MAXPRESSURE = 105
 const MINPIPEPRESSURE = 100
 const MAXPIPEPRESSURE = 40000
 const R = 8.31448
-const DESIREDFLOW = 5 # mol/tick
+const TICKSUNTILEMPTY = 3600 # 30min to empty room
 
 var pipeInTemp
 var mols
@@ -112,17 +112,17 @@ function Nominal
     t1 = (pipeInPressure * 100) / (R * pipeInTemp)
 
     #maxOutakeMoles
-    t2 = (pipeBeforeOutPressure * 1000) / (R * pipeBeforeOutTemperature)
+    t2 = (pipeBeforeOutPressure * 900) / (R * pipeBeforeOutTemperature)
     
     #maxIntakeMoles > #maxOutakeMoles
     if t1 > t2
         t1 = t2
     end
 
-    # t1 = t2
+    t2 = (100 * ROOMVOLUME) / (R * 296 * TICKSUNTILEMPTY)
 
-    if t1 > DESIREDFLOW
-        t1 = DESIREDFLOW
+    if t1 > t2
+        t1 = t2
     end
 
     #pumpSpeed1    #moles

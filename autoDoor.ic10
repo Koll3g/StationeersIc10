@@ -1,0 +1,72 @@
+alias doorOut d0
+alias doorIn d1
+alias sensorOut d2
+alias sensorIn d3
+alias switch d4
+alias activeVent d5
+
+alias state r15
+alias riskyAtmo r14
+
+define UNDEF 0
+define NORISK 1
+define RISK 2
+define INOUT 3
+define OUTIN 4
+define OVERRIDE 5
+
+define MAXPRESSDIFF 50
+define MAXVOLATILES 0.03
+
+Main:
+yield 
+
+l sens
+
+beq state UNDEF Undef 
+beq state NORISK Norisk 
+beq state INOUT InOut 
+beq state OUTIN OutIn
+beq state OVERRIDE Override 
+
+Undef:
+s doorOut Open 0
+s doorIn Open 0
+move state RISK
+j Main
+
+Risk:
+jal CheckSensors
+beq riskyAtmo 1 Main
+
+j Norisk
+
+Norisk:
+
+InOut: 
+
+OutIn:
+
+Override:
+
+CheckSensors:
+l r0 sensorIn Pressure 
+l r1 sensorOut Pressure
+sub r2 r0 r1
+abs r2 r0
+
+l r0 sensorIn RatioVolatiles
+l r1 sensorOut RatioVolatiles
+sub r3 r0 r1
+abs r3 r3
+
+l r0 sensorIn RatioNitrousOxide
+l r1 sensorOut RatioNitrousOxide
+sub r4 r0 r1
+abs r4 r4
+
+or r2 r2 r3
+or r4 r4 r2
+
+seq riskyAtmo r4 1
+j ra

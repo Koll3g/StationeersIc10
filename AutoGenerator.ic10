@@ -1,0 +1,36 @@
+#TURN GENERATOR ON OR OFF BASED ON AVG BATTERY CHARGE
+#(needs separate batch reader)
+
+alias generator d0
+alias avgBatteryChargeReader d1
+
+alias avgBatteryCharge r0
+alias isGeneratorOn r1
+
+define LOWERLIMIT 0.20
+define UPPERLIMIT 0.70
+
+Main:
+l isGeneratorOn generator On
+l avgBatteryCharge avgBatteryChargeReader Setting
+
+beqal isGeneratorOn 1 GeneratorOn
+bgtal LOWERLIMIT avgBatteryCharge TurnGeneratorOn
+
+yield
+j Main
+
+GeneratorOn:
+bgt avgBatteryCharge UPPERLIMIT TurnGeneratorOff
+j ra
+
+TurnGeneratorOff:
+s generator On 0
+j ra
+
+TurnGeneratorOn:
+s generator On 1
+j ra
+
+
+
