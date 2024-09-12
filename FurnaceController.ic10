@@ -1,0 +1,127 @@
+alias paHeat d0
+alias paCoolant d1
+alias paWaste d2
+alias furnace d3
+alias p1 r4
+alias V1 r5 
+alias T1 r6
+alias C1 r7
+alias p2 r8
+alias V2 r9 
+alias T2 r10
+alias C2 r11
+alias po r12
+alias To r14
+alias Co r15
+s furnace SettingOutput 100 # reset hard
+sbn -321403609 HASH("VPHeat") Setting 0 # reset
+sbn -321403609 HASH("VPWaste") Setting 0
+sbn -321403609 HASH("VPCoolant") Setting 0
+loop:
+lbn To -2098214189 HASH("To") Temperature Average
+lbn po -2098214189 HASH("po") Pressure Average
+l r1 furnace -8 # if p > 55MPa -> reset hard
+l r0 furnace Temperature
+sap r0 r0 To 0.01
+sap r1 r1 po 0.01
+and r0 r0 r1
+breq r0 1 -11 # if approx des. values -> reset
+l r13 paWaste Temperature
+alias paC paWaste
+jal CalcC
+brlt r13 To 11 # check boundries -> w-c or h-w
+l p1 paWaste Pressure
+l T1 paWaste Temperature
+move C1 r1
+l p2 paCoolant Pressure
+l T2 paCoolant Temperature
+alias paC paCoolant
+jal CalcC
+move C2 r1
+jr 10
+l p2 paWaste Pressure
+l T2 paWaste Temperature
+move C2 r1
+l p1 paHeat Pressure
+l T1 paHeat Temperature
+alias paC paHeat
+jal CalcC
+move C1 r1
+add r0 C1 C2 # C1 + C2
+div r1 r0 2  # (C1+C2) / 2 = Cm
+div r0 C1 r1 # C1 / Cm
+mul r2 T1 r0 # T1 * (C1/Cm) = Teta1
+div r0 C2 r1 # C2 / Cm
+mul r3 T2 r0 # T2 * (C2/Cm) = Teta2
+sub r0 To r3 # To - Teta2
+sub r2 r2 r3 # Teta1 - Teta2
+div r0 r0 r2 # (To-Teta2) / (Teta1-Teta2)
+mul Co r0 C1 # x * C1
+sub r0 1 r0  # 1 - x
+mul r0 r0 C2 # (1-x) * C2
+add Co Co r0 # Co = x*C1 + (1-x)*C2
+mul r3 To Co
+div r0 r3 T2
+sub r0 r0 C2
+mul r2 p2 r0 # p2 * ((To*Co)/T2 - C2)
+div r0 r3 T1
+sub r0 C1 r0
+mul r0 p1 r0 # p1 * (C1 - (To*Co)/T1)
+div r0 r2 r0 # V1/V2 = r2 / r0
+move V1 r0
+brle V1 1 4  # normalize (V1 or V2)
+div V2 1 V1
+move V1 1
+jr 2
+move V2 1
+l r1 furnace Temperature
+sub r0 r1 To
+abs r0 r0
+div r0 r0 200 # V-multiplier 0.5 at 100K diff
+max r3 p1 p2
+brlt r3 40000000 3 # if input p > 40MPa
+mul r0 r0 4  # limit at 4l
+jr 5
+brlt r3 20000000 3 # if input p > 20MPa
+mul r0 r0 7  # limit at 7l
+jr 2
+mul r0 r0 10 # limit at 10l
+mul V1 r0 V1
+mul V2 r0 V2
+brlt r13 To 5
+sbn -321403609 HASH("VPHeat") Setting 0
+sbn -321403609 HASH("VPWaste") Setting V1
+sbn -321403609 HASH("VPCoolant") Setting V2
+jr 4
+sbn -321403609 HASH("VPHeat") Setting V1
+sbn -321403609 HASH("VPWaste") Setting V2
+sbn -321403609 HASH("VPCoolant") Setting 0
+l r0 furnace Pressure
+sub r0 r0 po
+ble r0 0 4
+div r0 r0 200000 # 10Mpa / 200k = 50l
+s furnace SettingOutput r0
+jr 2
+s furnace SettingOutput 0
+j loop
+CalcC:
+move r1 0
+l r0 paC RatioCarbonDioxide
+mul r0 r0 28.2
+add r1 r1 r0
+l r0 paC RatioNitrogen
+mul r0 r0 20.6
+add r1 r1 r0
+l r0 paC RatioNitrousOxide
+mul r0 r0 23.0
+add r1 r1 r0
+l r0 paC RatioOxygen
+mul r0 r0 21.1
+add r1 r1 r0
+l r0 paC RatioVolatiles
+mul r0 r0 20.4
+add r1 r1 r0
+l r0 paC RatioPollutant
+mul r0 r0 24.8
+add r1 r1 r0
+j ra
