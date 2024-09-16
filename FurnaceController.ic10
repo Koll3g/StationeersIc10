@@ -1,13 +1,11 @@
-alias paHeat d0
-alias paCoolant d1
 alias paWaste d2
 alias furnace d3
 alias p1 r4
-alias V1 r5 
+alias V1 r5
 alias T1 r6
 alias C1 r7
 alias p2 r8
-alias V2 r9 
+alias V2 r9
 alias T2 r10
 alias C2 r11
 alias po r12
@@ -18,33 +16,36 @@ sbn -321403609 HASH("VPHeat") Setting 0 # reset
 sbn -321403609 HASH("VPWaste") Setting 0
 sbn -321403609 HASH("VPCoolant") Setting 0
 loop:
+lbn r0 -851746783 HASH("SelectionHash") Setting Average
+breq r0 0 -6
 lbn To -2098214189 HASH("To") Temperature Average
 lbn po -2098214189 HASH("po") Pressure Average
-l r1 furnace -8 # if p > 55MPa -> reset hard
+l r1 furnace Pressure # if p > 55MPa -> reset hard
+brge r1 55000000 -10
 l r0 furnace Temperature
 sap r0 r0 To 0.01
 sap r1 r1 po 0.01
 and r0 r0 r1
-breq r0 1 -11 # if approx des. values -> reset
+breq r0 1 -14 # if approx des. values -> reset
 l r13 paWaste Temperature
-alias paC paWaste
+alias paC d2 # d2 = PaWaste
 jal CalcC
 brlt r13 To 11 # check boundries -> w-c or h-w
 l p1 paWaste Pressure
 l T1 paWaste Temperature
 move C1 r1
-l p2 paCoolant Pressure
-l T2 paCoolant Temperature
-alias paC paCoolant
+l p2 d1 Pressure # d1 = PACoolant
+l T2 d1 Temperature
+alias paC d1
 jal CalcC
 move C2 r1
 jr 10
 l p2 paWaste Pressure
 l T2 paWaste Temperature
 move C2 r1
-l p1 paHeat Pressure
-l T1 paHeat Temperature
-alias paC paHeat
+l p1 d0 Pressure # d0 = PAHeat
+l T1 d0 Temperature
+alias paC d0
 jal CalcC
 move C1 r1
 add r0 C1 C2 # C1 + C2

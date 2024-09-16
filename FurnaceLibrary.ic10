@@ -1,0 +1,80 @@
+alias selectionDial d0
+alias selectionConsole d1
+alias To d3
+alias po d4
+
+Loop:
+l r0 selectionDial Setting
+brne r0 0 4 # OFF!!
+s selectionConsole Setting 0
+s To Setting 0
+s po Setting 0
+brne r0 1 4 # silikoune
+s selectionConsole Setting HASH("ItemSiliconIngot")
+s To Setting 1000
+s po Setting 10000000
+brne r0 2 4 # airoune
+s selectionConsole Setting HASH("ItemIronIngot")
+s To Setting 1000
+s po Setting 10000000
+brne r0 3 4 # koppa
+s selectionConsole Setting HASH("ItemCopperIngot")
+s To Setting 1000
+s po Setting 10000000
+brne r0 4 4 # silvo
+s selectionConsole Setting HASH("ItemSilverIngot")
+s To Setting 1000
+s po Setting 10000000
+brne r0 5 4 # goulde
+s selectionConsole Setting HASH("ItemGoldIngot")
+s To Setting 1000
+s po Setting 10000000
+brne r0 6 4 # liiid
+s selectionConsole Setting HASH("ItemLeadIngot")
+s To Setting 1000
+s po Setting 10000000
+brne r0 7 4 # nickl
+s selectionConsole Setting HASH("ItemNickelIngot")
+s To Setting 1000
+s po Setting 10000000
+brne r0 8 4 # schtiu
+s selectionConsole Setting HASH("ItemSteelIngot")
+s To Setting 1000
+s po Setting 10000000
+brne r0 9 4 # lktrm und dner man
+s selectionConsole Setting HASH("ItemElectrumIngot")
+s To Setting 1000
+s po Setting 1800000
+brne r0 10 4 # invare
+s selectionConsole Setting HASH("ItemInvarIngot")
+s To Setting 1350
+s po Setting 19000000
+brne r0 11 4 # konstantane
+s selectionConsole Setting HASH("ItemConstantanIngot")
+s To Setting 1200
+s po Setting 21000000
+brne r0 12 4 # soldere
+s selectionConsole Setting HASH("ItemSolderIngot")
+s To Setting 500
+s po Setting 10000000
+brne r0 13 4 # ashitroloi
+s selectionConsole Setting HASH("ItemAstroloyIngot")
+s To Setting 1200
+s po Setting 35000000
+brne r0 14 4 # hashtelloi
+s selectionConsole Setting HASH("ItemHastelloyIngot")
+s To Setting 975
+s po Setting 27500000
+brne r0 15 4 # incel
+s selectionConsole Setting HASH("ItemInconelIngot")
+s To Setting 1000
+s po Setting 23750000
+brne r0 16 4 # washpaloi
+s selectionConsole Setting HASH("ItemWaspaloyIngot")
+s To Setting 600
+s po Setting 51000000
+brne r0 17 4 # shitelite
+s selectionConsole Setting HASH("ItemStelliteIngot")
+s To Setting 1900
+s po Setting 15000000
+j Loop
