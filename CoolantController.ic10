@@ -1,0 +1,86 @@
+define MAXPRESSURE 30000
+define MINPRESSURE 20000
+define MAXTEMP 250
+define MINTEMP 200
+
+alias pumpIn d0
+alias pumpOut d1
+alias sensorIn d2
+alias sensorOut d3
+alias sensorTank d4
+alias vent d5
+
+alias tankPressure r15
+alias tankTemp r14
+alias fillingNeeded r13
+alias heatingNeeded r12
+alias stopFilling r11
+alias stopHeating r10
+alias notTooColdToFill r9
+alias noHeatingNeeded r8
+alias pressureHeatExchangerIn r7
+alias pressureHeatExchangerOut r6
+alias pressureInHeatExchanger r5 
+alias emptyHeatExchanger r4
+alias heatExchangerIsEmpty r3
+
+Main:
+l tankPressure sensorTank Pressure
+l tankTemp sensorTank Temperature
+l pressureHeatExchangerIn sensorIn Pressure
+l pressureHeatExchangerOut sesnsorOut Pressure
+
+sgt heatingNeeded MINTEMP tankTemp
+beqal heatingNeeded 1 StartHeating
+
+sgt fillingNeeded tankPressure MINPRESSURE
+seq noHeatingNeeded heatingNeeded 0
+and notTooColdToFill fillingNeeded noHeatingNeeded
+beqal notTooColdToFill 1 FillTank
+
+slt stopFilling tankPressure MAXPRESSURE
+beqal stopFilling StopFilling
+
+slt stopHeating MAXTEMP tankTemp
+or pressureInHeatExchanger pressureHeatExchangerIn pressureHeatExchangerOut
+and emptyHeatExchanger pressureInHeatExchanger stopHeating
+beqal emptyHeatExchanger 1 EmptyHeatExchanger
+
+
+
+yield
+j Main
+
+StartHeating:
+s pumpIn Setting 100
+s pumpIn Mode 1
+s pumpIn On 1
+
+s pumpOut Setting 100
+s pumpOut Mode 1
+s pumpOut On 1
+j ra
+
+StopHeating:
+
+j ra
+
+FillTank:
+s vent Mode 1
+s vent On 1
+j ra
+
+StopFilling:
+s vent On 0
+j ra
+
+EmptyHeatExchanger:
+s pumpIn Setting 100
+s pumpIn Mode 0
+s pumpIn On 1
+
+s pumpOut Setting 100
+s pumpOut Mode 1
+s pumpOut On 1
+j ra
+
