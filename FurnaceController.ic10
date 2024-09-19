@@ -21,10 +21,10 @@ breq r0 0 -6
 lbn To -2098214189 HASH("To") Temperature Average
 lbn po -2098214189 HASH("po") Pressure Average
 l r1 furnace Pressure # if p > 55MPa -> reset hard
-brge r1 55000000 -10
+brge r1 55000 -10
 l r0 furnace Temperature
 sap r0 r0 To 0.01
-sap r1 r1 po 0.01
+sap r1 r1 po 0.005 # coz for inconel 1% is critical
 and r0 r0 r1
 breq r0 1 -14 # if approx des. values -> reset
 l r13 paWaste Temperature
@@ -80,10 +80,10 @@ sub r0 r1 To
 abs r0 r0
 div r0 r0 200 # V-multiplier 0.5 at 100K diff
 max r3 p1 p2
-brlt r3 40000000 3 # if input p > 40MPa
+brlt r3 40000 3 # if input p > 40MPa
 mul r0 r0 4  # limit at 4l
 jr 5
-brlt r3 20000000 3 # if input p > 20MPa
+brlt r3 20000 3 # if input p > 20MPa
 mul r0 r0 7  # limit at 7l
 jr 2
 mul r0 r0 10 # limit at 10l
@@ -100,7 +100,7 @@ sbn -321403609 HASH("VPCoolant") Setting 0
 l r0 furnace Pressure
 sub r0 r0 po
 ble r0 0 4
-div r0 r0 200000 # 10Mpa / 200k = 50l
+div r0 r0 200 # 10Mpa (10000) / 200 = 50l
 s furnace SettingOutput r0
 jr 2
 s furnace SettingOutput 0

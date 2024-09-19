@@ -28,7 +28,7 @@ Main:
 l tankPressure sensorTank Pressure
 l tankTemp sensorTank Temperature
 l pressureHeatExchangerIn sensorIn Pressure
-l pressureHeatExchangerOut sesnsorOut Pressure
+l pressureHeatExchangerOut sensorOut Pressure
 
 sgt heatingNeeded MINTEMP tankTemp
 beqal heatingNeeded 1 StartHeating
