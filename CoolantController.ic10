@@ -1,7 +1,8 @@
 define MAXPRESSURE 30000
-define MINPRESSURE 20000
-define MAXTEMP 250
-define MINTEMP 200
+define MINPRESSURE 25000
+define MAXTEMP 180
+define MINTEMP 170
+define MAXPRESSHEATEX 20000
 
 alias pumpIn d0
 alias pumpOut d1
@@ -14,15 +15,22 @@ alias tankPressure r15
 alias tankTemp r14
 alias fillingNeeded r13
 alias heatingNeeded r12
-alias stopFilling r11
-alias stopHeating r10
+alias tankFull r11
+alias tankWarmEnough r10
 alias notTooColdToFill r9
 alias noHeatingNeeded r8
 alias pressureHeatExchangerIn r7
 alias pressureHeatExchangerOut r6
-alias pressureInHeatExchanger r5 
-alias emptyHeatExchanger r4
-alias heatExchangerIsEmpty r3
+alias pressureInHeatExchanger r5
+alias shouldEmptyHeatExchanger r4
+alias heatExchangerEmpty r3
+alias goIdle r2
+alias overPressureHeatExchange r1
+alias overPressureHeatExchangeOut r0
+
+s pumpIn On 0
+s pumpOut On 0
+s vent On 0
 
 Main:
 l tankPressure sensorTank Pressure
@@ -30,57 +38,79 @@ l tankTemp sensorTank Temperature
 l pressureHeatExchangerIn sensorIn Pressure
 l pressureHeatExchangerOut sensorOut Pressure
 
-sgt heatingNeeded MINTEMP tankTemp
+slt heatingNeeded tankTemp MINTEMP
+sgt overPressureHeatExchange pressureHeatExchangerIn MAXPRESSHEATEX
+sgt overPressureHeatExchangeOut pressureHeatExchangerOut MAXPRESSHEATEX
+or overPressureHeatExchange overPressureHeatExchange overPressureHeatExchangeOut
+beqal overPressureHeatExchange 1 OverpressureInHeatExchanger
 beqal heatingNeeded 1 StartHeating
 
-sgt fillingNeeded tankPressure MINPRESSURE
+slt fillingNeeded tankPressure MINPRESSURE
 seq noHeatingNeeded heatingNeeded 0
 and notTooColdToFill fillingNeeded noHeatingNeeded
 beqal notTooColdToFill 1 FillTank
 
-slt stopFilling tankPressure MAXPRESSURE
-beqal stopFilling StopFilling
+sgt tankFull tankPressure MAXPRESSURE
+beqal tankFull 1 StopFilling
 
-slt stopHeating MAXTEMP tankTemp
+sgt tankWarmEnough tankTemp MAXTEMP
 or pressureInHeatExchanger pressureHeatExchangerIn pressureHeatExchangerOut
-and emptyHeatExchanger pressureInHeatExchanger stopHeating
-beqal emptyHeatExchanger 1 EmptyHeatExchanger
+and shouldEmptyHeatExchanger pressureInHeatExchanger tankWarmEnough
+beqal shouldEmptyHeatExchanger 1 EmptyHeatExchanger
 
+slt heatExchangerEmpty pressureInHeatExchanger 5
+beqal heatExchangerEmpty 1 TurnPumpsOff
 
-
+s db Setting 7
 yield
 j Main
 
 StartHeating:
-s pumpIn Setting 100
-s pumpIn Mode 1
-s pumpIn On 1
-
-s pumpOut Setting 100
-s pumpOut Mode 1
-s pumpOut On 1
-j ra
-
-StopHeating:
-
-j ra
-
-FillTank:
-s vent Mode 1
-s vent On 1
-j ra
-
-StopFilling:
+s db Setting 1
 s vent On 0
-j ra
 
-EmptyHeatExchanger:
 s pumpIn Setting 100
 s pumpIn Mode 0
 s pumpIn On 1
 
 s pumpOut Setting 100
-s pumpOut Mode 1
+s pumpOut Mode 0
 s pumpOut On 1
 j ra
 
+TurnPumpsOff:
+s db Setting 2
+s pumpIn On 0
+s pumpOut On 0
+j ra
+
+FillTank:
+s db Setting 3
+s vent Mode 1
+s vent On 1
+j ra
+
+StopFilling:
+s db Setting 4
+s vent On 0
+j ra
+
+EmptyHeatExchanger:
+s db Setting 5
+s pumpIn Setting 100
+s pumpIn Mode 1
+s pumpIn On 1
+
+s pumpOut Setting 100
+s pumpOut Mode 0
+s pumpOut On 1
+j ra
+
+OverpressureInHeatExchanger:
+s db Setting 6
+s pumpIn On 0
+s pumpOut Setting 100
+s pumpOut Mode 0
+s pumpOut On 1
+add ra ra 1
+j ra
