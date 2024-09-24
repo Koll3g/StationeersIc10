@@ -29,6 +29,10 @@ push HASH("Centrifuge13")
 push HASH("Centrifuge14")
 push HASH("Centrifuge15")
 push HASH("Centrifuge16")
+push HASH("Centrifuge17")
+push HASH("Centrifuge18")
+push HASH("Centrifuge19")
+push HASH("Centrifuge20")
 push endOfArray
 move sp 1
 
