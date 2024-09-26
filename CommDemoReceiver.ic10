@@ -1,13 +1,9 @@
-define GET_TEMP 1
+define REQ_ADDR_STATE 500 #Placed=1, Finished=2, (Invalid=3)
+define REQ_ADDR_KEY 501
+define REQ_ADDR_VALUE 502
+
+define GET_DBSETTING 1
 define SET_DBSETTING 2
-
-define REQ_ADDR_STATE 400
-define REQ_ADDR_KEY 401
-define REQ_ADDR_VALUE 402
-
-define RES_ADDR_STATE 420
-define RES_ADDR_KEY 421
-define RES_ADDR_VALUE 422
 
 Main:
 jal CheckForRequest
@@ -15,34 +11,23 @@ j Main
 
 CheckForRequest:
 get r0 db REQ_ADDR_STATE
-bnez r0 HandleRequest
+beq r0 1 HandleRequest
 j ra
 
 HandleRequest:
 get r0 db REQ_ADDR_KEY
-beq r0 GET_TEMP GetTempReq
-beq r0 SET_DBSETTING SetDbSettingReq
-j ReqTypeNotFound
-
-GetTempReq:
-l r1 d1 Temperature #Custom logic code goes here
-put db RES_ADDR_KEY r0
-put db RES_ADDR_VALUE r1
-put db RES_ADDR_STATE 200
-j CloseRequest
-
-SetDbSettingReq:
-get r1 db REQ_ADDR_VALUE
-s db Setting r1 #Custom logic code goes here
-put db RES_ADDR_KEY r0
-put db RES_ADDR_STATE 200
-j CloseRequest
-
-ReqTypeNotFound:
-put db RES_ADDR_KEY r0
-put db RES_ADDR_STATE 404
-j CloseRequest
-
+beq r0 GET_DBSETTING GetDbSetting
+beq r0 SET_DBSETTING SetDbSetting
 CloseRequest:
-put db REQ_ADDR_STATE 0
+put db REQ_ADDR_STATE 2
 j ra
+
+GetDbSetting:
+l r0 db Setting #Custom logic code goes here
+put db REQ_ADDR_VALUE r0
+j CloseRequest
+
+SetDbSetting:
+get r0 db REQ_ADDR_VALUE
+s db Setting r0 #Custom logic code goes here
+j CloseRequest

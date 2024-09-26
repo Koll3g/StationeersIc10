@@ -1,23 +1,42 @@
-define GET_TEMP 1
+define REQ_ADDR_STATE 500 #Placed=1, Finished=2, (Invalid=3)
+define REQ_ADDR_KEY 501
+define REQ_ADDR_VALUE 502
+
+define GET_DBSETTING 1
 define SET_DBSETTING 2
 
-define REQ_ADDR_STATE 400
-define REQ_ADDR_KEY 401
-define REQ_ADDR_VALUE 402
+define OTHER_IC_ID 1234
 
-define RES_ADDR_STATE 420
-define RES_ADDR_KEY 421
-define RES_ADDR_VALUE 422
-
-define DEVICE_ID 1234
+alias buttonGet d0
+alias buttonSet d1
+alias dialSet d2
+alias displayGet d3
 
 Main:
-jal CheckForResponse
+l r0 buttonGet Setting
+beqal r0 1 GetDbSetting
+l r0 buttonSet Setting
+beqal r0 1 SetDbSetting
 j Main
 
-CheckForResponse:
-getd r0 DEVICE_ID RES_ADDR_STATE
-bnez r0 HandleResponse
+SetDbSetting:
+l r0 dialSet Setting #Custom logic code goes here
+putd OTHER_IC_ID REQ_ADDR_KEY SET_DBSETTING
+putd OTHER_IC_ID REQ_ADDR_VALUE r0
+putd OTHER_IC_ID REQ_ADDR_STATE 1
+#Could wait for confirmation like with Get Command
 j ra
 
-HandleResponse
+#Blocking variant
+GetDbSetting:
+putd OTHER_IC_ID REQ_ADDR_KEY GET_DBSETTING
+putd OTHER_IC_ID REQ_ADDR_STATE 1
+WaitForResponse:
+getd r0 OTHER_IC_ID REQ_ADDR_STATE
+beq r0 2 GetDbSettingResponse
+j WaitForResponse
+
+GetDbSettingResponse:
+getd r0 OTHER_IC_ID REQ_ADDR_VALUE
+s displayGet Setting r0 #Custom logic code goes here
+j ra
