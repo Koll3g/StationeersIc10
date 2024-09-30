@@ -1,0 +1,69 @@
+alias tankWaste d0
+alias activeVent d1
+
+define Mode1MaxPressure 300
+define Mode1NomPressure 250
+define Mode1MinPressure 200
+define Mode2MaxPressure 5000
+define Mode2NomPressure 4500
+define Mode2MinPressure 4000
+
+define ThresholdTemperature 150
+define MinWasteTemperature 200
+define MaxWasteTemperature 260
+
+alias wasteTemperature r0
+alias wastePressure r1 
+
+alias reachNominal r12
+alias currentMaxPressure r13
+alias currentNomPressure r14
+alias currentMinPressure r15
+
+move reachNominal 0
+
+Loop:
+l wasteTemperature tankWaste Temperature
+brgt wasteTemperature ThresholdTemperature 5
+move currentMaxPressure Mode1MaxPressure
+move currentNomPressure Mode1NomPressure
+move currentMinPressure Mode1MinPressure
+j 4
+move currentMaxPressure Mode2MaxPressure
+move currentNomPressure Mode2NomPressure
+move currentMinPressure Mode2MinPressure
+
+l wastePressure tankWaste Pressure
+bgt wastePressure currentMaxPressure Blow
+blt wastePressure currentMinPressure Suck
+bgt wasteTemperature MaxWasteTemperature SuckT
+
+brgt reachNominal 0 3
+s activeVent On 0
+j Loop
+brgt reachNominal 1 4
+bgt wastePressure currentNomPressure Loop
+s activeVent On 0
+j Loop
+brgt reachNominal 2 4
+blt wastePressure currentNomPressure Loop
+s activeVent On 0
+j Loop
+bgt wasteTemperature MinWasteTemperature Loop
+s activeVent On 0
+j Loop
+
+Blow:
+move reachNominal 1
+s activeVent Mode 0
+s activeVent On 1
+j Loop
+
+SuckT:
+move reachNominal 3
+jr 3
+Suck:
+move reachNominal 2
+s activeVent Mode 1
+s activeVent On 1
+j Loop
