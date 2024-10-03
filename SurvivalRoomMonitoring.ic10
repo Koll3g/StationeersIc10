@@ -1,0 +1,78 @@
+define MIN_PRESSURE_OXYGEN 2000
+define MAX_PRESSURE_OXYGEN 16000
+define MIN_PRESSURE_ROOM 75
+define MAX_PRESSURE_ROOM 150
+define MIN_TEMP_ROOM 288
+define MAX_TEMP_ROOM 298
+define MIN_RATIO_OXYGEN 0.5
+define MAX_RATIO_POLLUTANT 0.01
+define MAX_RATIO_CARBONDIOXIDE 0.02
+define MAX_RATIO_VOLATILE 0.01
+define MIN_CHARGE_BATTERY 0.8
+
+define HASH_SLEEPERS -1300059018
+define HASH_INFO_DISPLAY -815193061
+
+define ERROR_PRESSURE_OXYGEN 1
+define ERROR_PRESSURE_ROOM 2
+define ERROR_TEMP_ROOM 3
+define ERROR_RATIO_AIR 4
+define ERROR_BATTERY_CHARGE 5
+define ERROR_SLEEPERS 6
+
+alias oxygenSensor d0
+alias roomSensor d1
+alias battery d2
+alias speaker d3
+alias warningLight d4
+
+alias errorCode r15
+
+Main:
+l r0 oxygenSensor Pressure
+move errorCode ERROR_PRESSURE_OXYGEN
+bgt r0 MAX_PRESSURE_OXYGEN SetAlarm
+blt r0 MIN_PRESSURE_OXYGEN SetAlarm
+l r0 roomSensor Pressure
+move errorCode ERROR_PRESSURE_ROOM
+bgt r0 MAX_PRESSURE_ROOM SetAlarm
+blt r0 MIN_PRESSURE_ROOM SetAlarm
+
+l r0 roomSensor Temperature
+move errorCode ERROR_TEMP_ROOM
+bgt r0 MAX_TEMP_ROOM SetAlarm
+blt r0 MIN_TEMP_ROOM SetAlarm
+
+l r0 roomSensor RatioOxygen
+move errorCode ERROR_RATIO_AIR
+blt r0 MIN_RATIO_OXYGEN SetAlarm
+l r0 roomSensor RatioPollutant
+bgt r0 MAX_RATIO_POLLUTANT SetAlarm
+l r0 roomSensor RatioCarbonDioxide 
+bgt r0 MAX_RATIO_CARBONDIOXIDE SetAlarm
+l r0 roomSensor RatioVolatiles
+bgt r0 MAX_RATIO_VOLATILE SetAlarm
+
+l r0 battery Charge
+move errorCode ERROR_BATTERY_CHARGE
+blt r0 MIN_CHARGE_BATTERY SetAlarm
+
+lb r0 HASH_SLEEPERS Error Maximum
+move errorCode ERROR_SLEEPERS
+beq r0 1 SetAlarm
+
+s speaker On 0
+s warningLight On 0
+sb HASH_INFO_DISPLAY Setting 0
+
+yield
+j Main
+
+SetAlarm:
+s speaker On 1
+s speaker Mode 1
+s warningLight On 1
+sb HASH_INFO_DISPLAY Setting errorCode
+yield
+j Main
+

@@ -5,14 +5,18 @@ define REQ_ADDR_VALUE 502
 define GET_DBSETTING 1
 define SET_DBSETTING 2
 
-define OTHER_IC_ID 1234
+define OTHER_IC_ID 295773
 
 alias buttonGet d0
 alias buttonSet d1
 alias dialSet d2
-alias displayGet d3
+alias displaySet d3
+alias displayGet d4
 
 Main:
+l r0 dialSet Setting
+s displaySet Setting r0
+
 l r0 buttonGet Setting
 beqal r0 1 GetDbSetting
 l r0 buttonSet Setting

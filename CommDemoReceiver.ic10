@@ -5,7 +5,12 @@ define REQ_ADDR_VALUE 502
 define GET_DBSETTING 1
 define SET_DBSETTING 2
 
+alias dbDisplay d0
+
 Main:
+l r0 db Setting
+s dbDisplay Setting r0
+
 jal CheckForRequest
 j Main
 
