@@ -9,16 +9,22 @@ define DISP_CURR_V_LRG HASH("Disp Curr Angle V Large")
 define SWITCH_PRIMARY_DISH HASH("Switch Primary Dish")
 define LARGE_DISH HASH("Large Satellite Dish")
 define MEDIUM_DISH HASH("Medium Satellite Dish")
+<<<<<<< HEAD
 define BTN_TOGGLE_HANGAR_DOORS HASH("Button Toggle Hangar Doors")
+=======
+>>>>>>> 15e42b25320d783e80e735d730a0837dde334e2c
 
 define SWITCH 321604921
 define DISPLAY -815193061
 define DIAL 554524804
 define MED_DISH 439026183
 define LRG_DISH 1913391845
+<<<<<<< HEAD
 define BUTTON 491845673
 define LRG_HANGAR_DOOR -1351081801
 define MED_HANGAR_DOOR -566348148
+=======
+>>>>>>> 15e42b25320d783e80e735d730a0837dde334e2c
 
 alias dialSettingHz r15
 alias dialSettingV r14
@@ -46,9 +52,12 @@ sbn DISPLAY DISP_CURR_HZ_LRG Setting r0
 lbn r0 LRG_DISH LARGE_DISH Vertical Average
 sbn DISPLAY DISP_CURR_V_LRG Setting r0
 
+<<<<<<< HEAD
 lbn r0 BUTTON BTN_TOGGLE_HANGAR_DOORS Setting Average
 beqal r0 1 ToggleHangarDoors
 
+=======
+>>>>>>> 15e42b25320d783e80e735d730a0837dde334e2c
 yield
 j Main
 
@@ -62,12 +71,16 @@ sbn LRG_DISH LARGE_DISH Horizontal dialSettingHz
 sbn LRG_DISH LARGE_DISH Vertical dialSettingV
 j ra
 
+<<<<<<< HEAD
 ToggleHangarDoors:
 lb r0 LRG_HANGAR_DOOR Open Average
 seq r0 r0 0
 sb LRG_HANGAR_DOOR Open r0
 sb MED_HANGAR_DOOR Open r0
 j ra
+=======
+
+>>>>>>> 15e42b25320d783e80e735d730a0837dde334e2c
 
 
 
