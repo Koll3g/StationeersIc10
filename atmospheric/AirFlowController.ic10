@@ -1,0 +1,73 @@
+alias patInputGas d0
+
+alias lowerRoomPressure r7
+alias upperRoomPressure r8
+
+alias temperatureMultiplier r9
+alias co2RatioMultiplier r10
+
+alias roomCo2Ratio r11
+alias inflowTemperature r12
+alias roomTemperature r13
+
+alias numberOfOutVents r14
+alias numberOfInVents r15
+
+define RoomSize 9 # in nr. of Big-Grid-Cubes
+define AverageRoomPressure 100 # in kPa
+define MaxPressureDiff 30 # in kPa
+
+sbn -1129453144 HASH("AirVentIn") On 0
+sbn -1129453144 HASH("AirVentOut") On 0
+
+Loop:
+sbn -1129453144 HASH("AirVentIn") Lock 1
+lbn numberOfInVents -1129453144 HASH("AirVentIn") Lock Sum
+sbn -1129453144 HASH("AirVentOut") Lock 1
+lbn numberOfOutVents -1129453144 HASH("AirVentOut") Lock Sum
+
+lbn roomCo2Ratio -1252983604 HASH("AirSensor") RatioCarbonDioxide Average
+lbn roomTemperature -1252983604 HASH("AirSensor") Temperature Average
+l inflowTemperature patInputGas Temperature
+
+mul r0 roomCo2Ratio 1000
+mul r1 r0 r0 # x^2
+mul r0 r1 r0 # x^3
+mul r0 r0 0.03 # 0.03x^3
+sqrt co2RatioMultiplier r0 # 0.03x^(3/2)
+
+sub r0 roomTemperature inflowTemperature
+abs r0 r0 # absolute temp-diff
+mul r1 r0 r0 # x^2
+mul r0 r1 r0 # x^3
+mul r0 r0 0.5 # 0.5x^3
+sqrt temperatureMultiplier r0 # 0.5x^(3/2) 
+
+add r0 temperatureMultiplier co2RatioMultiplier
+
+mul r1 RoomSize 0.05
+sqrt r1 r1 # sqrt(0.05x)
+
+mul r2 r0 r1 # temp, co2Ratio and roomsize
+
+div r0 MaxPressureDiff 2
+# cap at max +-maxPressureDiff
+brle r2 r0 2
+move r2 r0
+
+sub lowerRoomPressure AverageRoomPressure r2
+div r0 r2 numberOfInVents
+sqrt r1 numberOfInVents
+mul r0 r0 r1 # 1/x*sqrt(x)
+mul lowerRoomPressure lowerRoomPressure r0
+
+add upperRoomPressure AverageRoomPressure r2
+div r0 r2 numberOfOutVents
+sqrt r1 numberOfOutVents
+mul r0 r0 r1 # 1/x*sqrt(x)
+mul upperRoomPressure upperRoomPressure r0
+
+sbn -1129453144 HASH("AirVentIn") PressureExternal lowerRoomPressure
+sbn -1129453144 HASH("AirVentOut") PressureExternal upperRoomPressure
+
+j Loop
