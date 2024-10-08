@@ -1,0 +1,42 @@
+define Filter -348054045
+define WarningLight -1535893860
+define Dial 554524804
+define Sensor 322782515
+define Licht 1436121888
+define SLS -851746783
+start:
+jal Filterkontrolle
+jal Lichtsteuerung
+yield
+j start
+
+Filterkontrolle:
+lbns r0 Filter HASH("Filtration") 0 Quantity 1
+lbns r1 Filter HASH("Filtration") 1 Quantity 1
+add r2 r1 r0
+brgt r2 0 3
+sbn WarningLight HASH("WarnungFilter") On 1
+j Filterstop
+brgt r2 100 2
+j Filterwarnung
+sbn Filter HASH("Filtration") On 1
+sbn SLS HASH("SLS11") Setting 0 #rename SLS number!
+sbn WarningLight HASH("WarnungFilter") On 0
+j ra
+
+Filterwarnung:
+sbn WarningLight HASH("WarnungFilter") On 1
+sbn SLS HASH("SLS11") Setting 1 #rename SLS number!
+j ra
+
+Filterstop:
+sbn Filter HASH("Filtration") On 0
+sbn SLS HASH("SLS11") Setting 2 #rename SLS number!
+j ra
+
+Lichtsteuerung:
+lbn r3 Sensor HASH("Anwesenheit") Activate 1
+breq r3 r4 3
+lbn r4 Sensor HASH("Anwesenheit") Activate 1
+sb Licht On r4
+j ra

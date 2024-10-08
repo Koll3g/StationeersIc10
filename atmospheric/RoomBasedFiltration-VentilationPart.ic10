@@ -1,0 +1,19 @@
+define Sensor 322782515 #proxy Sensor
+define Licht 555215790 #Lichter
+define Dial 554524804
+define Vent -1129453144
+sbn Dial HASH("DialOut") Mode 150
+sbn Dial HASH("DialIn") Mode 150
+start:
+lbn r0 Sensor HASH("Anwesenheit") Activate 1
+breq r0 r1 3
+lbn r1 Sensor HASH("Anwesenheit") Activate 1
+sbn Licht HASH("Wall Light (Long Wide)") On r1
+lbn r7 Dial HASH("DialIn") Setting 1
+sbn Vent HASH("VentIn") PressureExternal r7
+sbn Vent HASH("VentIn") Mode 1
+lbn r8 Dial HASH("DialOut") Setting 1
+sbn Vent HASH("VentOut") PressureExternal r8
+sbn Vent HASH("VentOut") Mode 0
+yield
+j start
