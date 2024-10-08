@@ -15,9 +15,8 @@ alias silo3 r12
 alias silo3Amount r13
 alias currentRecipe r15
 alias currentAmount r14
-sleep 3
 l r5 db Setting
-breq r5 0 -2
+breq r5 0 -1
 trunc currentRecipe r5
 sub currentAmount r5 currentRecipe
 mul currentAmount currentAmount 100
@@ -52,10 +51,11 @@ move silo1 leadSilo
 brne currentRecipe 7 2 # nickel
 move silo1 nickelSilo
 bgt silo1 0 93 # doLoad
-brne currentRecipe 8 4 # steel
+brne currentRecipe 8 5 # steel
 move silo1 ironSilo
 mul silo1Amount currentAmount 15
 move silo2 coalSilo
+bgt silo1 0 93 # doLoad
 mul silo1Amount currentAmount 5
 brne currentRecipe 9 3 # electrum
 move silo1 silverSilo
@@ -92,7 +92,7 @@ move silo1 siliconSilo
 move silo2 silverSilo
 move silo3 cobaltSilo
 jal 95 # doLoad
-j 18
+j 17
 move r6 0
 breq silo1 0 4
 sd silo1 ClearMemory 1

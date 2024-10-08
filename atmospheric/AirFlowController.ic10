@@ -16,7 +16,7 @@ alias numberOfInVents r15
 define RoomSize 9 # in nr. of Big-Grid-Cubes
 define AverageRoomPressure 100 # in kPa
 define MaxPressureDiff 30 # in kPa
-define RoomTemperature 21 # in Celsius, used if not PAT is connected
+define RoomTemperatureUser 21 # in Celsius, used if not PAT is connected
 
 sbn -1129453144 HASH("AirVentIn") On 0
 sbn -1129453144 HASH("AirVentOut") On 0
@@ -33,7 +33,7 @@ lbn roomTemperature -1252983604 HASH("AirSensor") Temperature Average
 brdns patInputGas 3 
 l inflowTemperature patInputGas Temperature
 jr 3
-move inflowTemperature roomTemperature
+move inflowTemperature RoomTemperatureUser
 add inflowTemperature inflowTemperature 273
 
 mul r0 roomCo2Ratio 1000
