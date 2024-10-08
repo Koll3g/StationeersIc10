@@ -8,12 +8,13 @@ define Mode2MaxPressure 5000
 define Mode2NomPressure 4500
 define Mode2MinPressure 4000
 
-define ThresholdTemperature 150
-define MinWasteTemperature 200
+define ThresholdTemperature 180
+define MinWasteTemperature 210
 define MaxWasteTemperature 260
 
 alias wasteTemperature r0
-alias wastePressure r1 
+alias wastePressure r1
+alias wasteLiquid r2 
 
 alias reachNominal r12
 alias currentMaxPressure r13
@@ -32,6 +33,9 @@ j 4
 move currentMaxPressure Mode2MaxPressure
 move currentNomPressure Mode2NomPressure
 move currentMinPressure Mode2MinPressure
+
+l wasteLiquid tankWaste VolumeOfLiquid
+bgt wasteLiquid 0 Stop
 
 l wastePressure tankWaste Pressure
 bgt wastePressure currentMaxPressure Blow
@@ -66,4 +70,8 @@ Suck:
 move reachNominal 2
 s activeVent Mode 1
 s activeVent On 1
+j Loop
+
+Stop:
+s activeVent On 0
 j Loop
