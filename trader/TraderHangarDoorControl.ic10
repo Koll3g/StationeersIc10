@@ -1,0 +1,126 @@
+define COLD_AIR_VENTS HASH("")
+define BREATHABLE_AIR_VENTS HASH("")
+define GAS_SENSOR_LANDING_AREA HASH("")
+define GAS_SENSOR_AIRLOCK HASH("")
+define TOGGLE_BUTTON_DOORS HASH("")
+
+define HANGAR_DOOR 1234
+define AIR_VENT 1234
+define GAS_SENSOR 1234
+define BUTTON 1234
+
+define STATE_UNDEF 0
+define STATE_COLD_ENV_DOOR_OPEN 1
+define STATE_DOOR_CLOSING 2
+define STATE_EMPTYING_COLD_AIR 3
+define STATE_FILLING_BREATHABLE_AIR 4
+define STATE_BREATHABLE_ENV_DOOR_CLOSED 5
+define STATE_EMPTYING_BREATHABLE_AIR 6
+define STATE_DOOR_OPENING 7
+
+define WAITING_TICKS 5
+
+alias waitCounterDoor r15 
+alias waitCounterColdAir r14 
+alias waitCounterBreathableAir r13 
+alias state r12 
+
+Main:
+l state db Setting
+beq state STATE_UNDEF Undef
+beq state STATE_COLD_ENV_DOOR_OPEN ColdEnvDoorOpen
+beq state STATE_DOOR_CLOSING DoorClosing
+beq state STATE_EMPTYING_COLD_AIR EmptyingColdAir
+beq state STATE_FILLING_BREATHABLE_AIR FillingBreathableAir
+beq state STATE_BREATHABLE_ENV_DOOR_CLOSED BreathableEnvDoorClosed
+beq state STATE_EMPTYING_BREATHABLE_AIR EmptyingBreathableAir
+beq state STATE_DOOR_OPENING DoorOpening
+s db Setting STATE_UNDEF
+j Main
+
+Undef:
+sb AIR_VENT On 0
+lbn r0 GAS_SENSOR GAS_SENSOR_LANDING_AREA Temperature Average
+s db Setting STATE_COLD_ENV_DOOR_OPEN
+brle r0 275 2
+    s db Setting STATE_BREATHABLE_ENV_DOOR_CLOSED
+j Main
+
+ColdEnvDoorOpen:
+sb HANGAR_DOOR Open 1
+lbn r0 BUTTON TOGGLE_BUTTON_DOORS Average
+breq r0 0 2
+    s db Setting STATE_DOOR_CLOSING
+j Main
+
+DoorClosing:
+sb HANGAR_DOOR Open 0
+brlt waitCounterDoor WAITING_TICKS 2
+    s db Setting STATE_EMPTYING_COLD_AIR
+add waitCounterDoor waitCounterDoor 1
+yield
+j Main
+
+EmptyingColdAir:
+move waitCounterDoor 0
+sbn AIR_VENT COLD_AIR_VENTS Setting 0 #double check
+sbn AIR_VENT COLD_AIR_VENTS On 1
+lbn r0 GAS_SENSOR GAS_SENSOR_LANDING_AREA Pressure Maximum
+beq r0 0 RoomEmptyCold
+move waitCounterColdAir 0
+RoomEmptyColdReturn:
+brlt waitCounterColdAir WAITING_TICKS 2
+    s db Setting STATE_FILLING_BREATHABLE_AIR
+j Main
+RoomEmptyCold:
+add waitCounterColdAir waitCounterColdAir 1
+yield
+j RoomEmptyReturn
+
+FillingBreathableAir:
+move waitCounterColdAir 0
+sbn AIR_VENT COLD_AIR_VENTS On 0
+sbn AIR_VENT BREATHABLE_AIR_VENTS Setting 0 #double check
+sbn AIR_VENT BREATHABLE_AIR_VENTS On 1
+lbn r0 GAS_SENSOR GAS_SENSOR_LANDING_AREA Pressure Minimum
+bge r0 100 RoomFullBreathable
+move waitCounterBreathableAir 0
+RoomFullBreathableReturn:
+brlt waitCounterBreathableAir WAITING_TICKS 2
+    s db Setting STATE_BREATHABLE_ENV_DOOR_CLOSED
+j Main
+RoomFullBreathable:
+add waitCounterBreathableAir waitCounterBreathableAir 1
+yield
+j RoomFullBreathableReturn
+
+BreathableEnvDoorClosed:
+sb HANGAR_DOOR Open 0
+move waitCounterBreathableAir 0
+sbn AIR_VENT BREATHABLE_AIR_VENTS On 0
+lbn r0 BUTTON TOGGLE_BUTTON_DOORS Average
+breq r0 0 2
+    s db Setting STATE_EMPTYING_BREATHABLE_AIR
+j Main
+
+EmptyingBreathableAir:
+sbn AIR_VENT BREATHABLE_AIR_VENTS Setting 1 #double check
+sbn AIR_VENT BREATHABLE_AIR_VENTS On 1
+lbn r0 GAS_SENSOR GAS_SENSOR_LANDING_AREA Pressure Maximum
+beq r0 0 RoomEmptyBreathable
+move waitCounterBreathableAir 0
+RoomEmptyBreathableReturn:
+brlt waitCounterBreathableAir WAITING_TICKS 2
+    s db Setting STATE_DOOR_OPENING
+j Main
+RoomEmptyBreathable:
+add waitCounterBreathableAir waitCounterBreathableAir 1
+yield
+j RoomEmptyBreathableReturn
+
+DoorOpening:
+move waitCounterBreathableAir 0
+sbn AIR_VENT BREATHABLE_AIR_VENTS On 0
+sb HANGAR_DOOR Open 1
+s db Setting STATE_COLD_ENV_DOOR_OPEN
+j Main
