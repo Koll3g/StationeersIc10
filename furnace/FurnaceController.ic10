@@ -1,0 +1,122 @@
+alias PAHeat d0
+alias PACoolant d1
+alias PAWaste d2
+alias furnace d3
+
+alias p1 r4
+alias V1 r5
+alias T1 r6
+alias p2 r8
+alias V2 r9
+alias T2 r10
+alias po r12
+alias To r14
+alias Tc r15
+
+alias mode r11
+
+Reset:
+s furnace SettingOutput 100 # reset hard
+sbn -321403609 HASH("VPHeat") Setting 0 # reset
+sbn -321403609 HASH("VPWaste") Setting 0
+sbn -321403609 HASH("VPCoolant") Setting 0
+move Tc 0
+Loop:
+yield
+lbn r0 -128473777 HASH("IC FurnaceLibrary") Setting Average
+beq r0 0 Reset
+lbn To -851746783 HASH("To") Setting Average
+lbn po -851746783 HASH("po") Setting Average
+l r1 furnace Pressure # if p > 55MPa -> reset hard
+bge r1 57000 Reset
+l r13 PAWaste Temperature
+brap r13 To 0.05 14
+brlt r13 To 7 # check boundries -> w-c or h-w
+l p1 PAWaste Pressure
+l T1 PAWaste Temperature
+l p2 PACoolant Pressure
+l T2 PACoolant Temperature
+move mode 1
+jr 6
+l p1 PAHeat Pressure
+l T1 PAHeat Temperature
+l p2 PAWaste Pressure
+l T2 PAWaste Temperature
+move mode 2
+jr 6
+l p1 PAHeat Pressure
+l T1 PAHeat Temperature
+l p2 PACoolant Pressure
+l T2 PACoolant Temperature
+move mode 3
+
+move Tc To
+
+l r0 furnace Temperature
+sub r0 To r0
+brgt r0 20 5
+mul r1 r0 r0
+mul r0 r1 r0
+mul r0 r0 0.02
+add Tc Tc r0
+
+# Calc V1/V2 (max 1)
+div r0 Tc T2
+sub r0 r0 1
+mul r0 r0 p2 # p2 * (To/T2 - 1)
+div r1 Tc T1
+sub r1 1 r1
+mul r1 r1 p1 # p1 * (1 - To/T1)
+div r2 r0 r1 # V1/V2 = r0 / r1
+
+move V1 r2
+brle V1 1 4  # normalize (V1 or V2)
+div V2 1 V1
+move V1 1
+jr 2
+move V2 1
+
+# Calc V-Multiplier
+l r1 furnace Temperature
+sub r0 r1 To
+abs r0 r0
+mul r0 r0 r0
+mul r0 r0 0.0015 # 0.0015x^2
+
+l r2 furnace Pressure
+sub r3 po r2
+brle r3 0 4
+mul r3 r3 r3
+mul r3 r3 0.0001 # 0.0001x^2
+add r0 r0 r3
+
+brle r0 1 2
+move r0 1
+mul r0 r0 10 # limit at 10l
+
+mul V1 r0 V1
+mul V2 r0 V2
+
+breq mode 1 10
+breq mode 2 5
+sbn -321403609 HASH("VPHeat") Setting V1
+sbn -321403609 HASH("VPWaste") Setting 0
+sbn -321403609 HASH("VPCoolant") Setting V2
+jr 4
+sbn -321403609 HASH("VPHeat") Setting V1
+sbn -321403609 HASH("VPWaste") Setting V2
+sbn -321403609 HASH("VPCoolant") Setting 0
+jr 4
+sbn -321403609 HASH("VPHeat") Setting 0
+sbn -321403609 HASH("VPWaste") Setting V1
+sbn -321403609 HASH("VPCoolant") Setting V2
+
+l r0 furnace Pressure
+sub r0 r0 po
+brle r0 0 5
+mul r0 r0 r0
+mul r0 r0 0.0006 # 0.0006x^2
+s furnace SettingOutput r0
+j Loop
+s furnace SettingOutput 0
+j Loop

@@ -1,0 +1,117 @@
+# AirMix Controller
+alias paGas1 d0
+alias paGas2 d1
+alias paOutput d2
+alias vpGas1 d3
+alias vpGas2 d4
+alias Gas1Ratio d5
+
+alias Tout r10
+alias Pout r11
+alias nout r12
+alias n1 r13
+alias n2 r14
+alias V1 r15
+alias V2 r16
+
+define R 8.314462
+
+# User Definitions
+define Vout 10 # l
+define MaximumVin 10 # l
+define MinimumInputPressure 1000 # kPa
+define MaximumOutputPressure 20000 # kPa
+# END: User Definitions
+
+s vpGas1 On 1
+s vpGas1 Lock 0
+s vpGas2 On 1
+s vpGas2 Lock 0
+
+Reset:
+s vpGas1 Setting 0
+s vpGas2 Setting 0
+
+Loop:
+l r0 paGas1 Pressure
+l r1 paGas2 Pressure
+and r2 r0 r1
+beq r2 0 Loop
+
+l r3 paOutput Pressure
+brlt r3 MaximumOutputPressure 5
+
+s vpGas1 Setting 0
+s vpGas2 Setting 0
+j Loop
+
+slt r3 r0 MinimumInputPressure
+slt r4 r1 MinimumInputPressure
+or r5 r3 r4
+breq r5 0 5
+
+s vpGas1 Setting 0
+s vpGas2 Setting 0
+j Loop
+
+# Calculate output Pressure
+mul r0 r0 1000
+mul r1 r1 1000
+l r5 Gas1Ratio Setting
+div r5 r5 100
+mul r3 r0 r5
+sub r4 1 r5
+mul r4 r4 r1
+add Pout r3 r4
+
+# Calculate output Temperature
+l r0 paGas1 Temperature
+l r1 paGas2 Temperature
+l r5 Gas1Ratio Setting
+div r5 r5 100
+mul r3 r0 r5
+sub r4 1 r5
+mul r4 r4 r1
+add Tout r3 r4
+
+# Calculate output moles
+div r6 Vout 1000
+mul r3 Pout r6
+mul r4 R Tout
+div nout r3 r4
+
+# Calculate moles for Gas1 and Gas2
+l r5 Gas1Ratio Setting
+div r5 r5 100
+mul n1 nout r5
+sub r4 1 r5
+mul n2 nout r4
+
+# Calculate Volume for Gas1
+l r0 paGas1 Temperature
+l r1 paGas1 Pressure
+mul r1 r1 1000
+mul r3 n1 R
+mul r3 r3 r0
+div V1 r3 r1
+mul V1 V1 1000
+
+# Calculate Volume for Gas2
+l r0 paGas2 Temperature
+l r1 paGas2 Pressure
+mul r1 r1 1000
+mul r3 n2 R
+mul r3 r3 r0
+div V2 r3 r1
+mul V2 V2 1000
+
+sgt r0 V1 MaximumVin
+sgt r1 V2 MaximumVin
+or r0 r0 r1
+beq r0 1 Reset
+
+# Set Volumes for Gases
+s vpGas1 Setting V1
+s vpGas2 Setting V2
+
+j Loop
