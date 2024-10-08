@@ -1,0 +1,105 @@
+define Mirror 2096189278 #r0 Status Sturm||r1+2 Batteriestatus||r3 Zaehler alarm sturm
+define Speaker -828056979 #r4 auslesen SLSmeldungen
+define Leuchte -1535893860
+define Batterie -1388288459
+define Dis -815193061
+define Cableanalyser 1036015121
+define Sensor -1252983604
+define Button 491845673
+define MEM -851746783
+main:
+sbn Speaker HASH("SLS") Volume 100
+lb r0 Mirror Mode 1 #abfrage Sturmstatus
+beqal r0 0 nostorm
+brge r3 3 2
+beqal r0 1 incomming
+jal batterie #abfrage Batteriedaten
+jal SLSAir #muss ganz unten in der Kette stehen !!!
+j main
+SLSAir:
+lbn r4 MEM HASH("SLS11") Setting 1
+breq r4 0 4
+div r5 r4 10
+add r6 r5 11 #hier SLS-Nummer eintragen (SLS11=11)
+j Alarm
+lbn r4 MEM HASH("SLS12") Setting 1
+breq r4 0 4
+div r5 r4 10
+add r6 r5 12 #hier SLS-Nummer eintragen (SLS11=11)
+j Alarm
+lbn r4 MEM HASH("SLS15") Setting 1
+breq r4 0 4
+div r5 r4 10
+add r6 r5 15 #hier SLS-Nummer eintragen (SLS11=11)
+j Alarm
+#lbn r4 MEM HASH("SLS13") Setting 1
+#Platzhalter für weitere Teilnehmer
+#etc. einfach von oben kopieren
+
+
+
+
+
+Alarm:
+beqal r4 2 Alarmair
+beqal r4 1 Warnungair
+beqal r4 99 Raumalarm
+sbn Speaker HASH("SLS") On 0
+j main
+Warnungair:
+sbn Dis HASH("SLS") Mode 0
+sbn Dis HASH("SLS") Color 5
+sbn Dis HASH("SLS") Setting r6
+sbn Leuchte HASH("SLS") On 1
+sbn Speaker HASH("SLS") On 1
+sbn Speaker HASH("SLS") Mode 1
+j SLSAir
+Alarmair:
+sbn Dis HASH("SLS") Mode 0
+sbn Dis HASH("SLS") Color 4
+sbn Dis HASH("SLS") Setting r6
+sbn Leuchte HASH("SLS") On 1
+sbn Speaker HASH("SLS") On 1
+sbn Speaker HASH("SLS") Mode 3
+j SLSAir
+Raumalarm:
+sbn Dis HASH("SLS") Mode 0
+sbn Dis HASH("SLS") Color 5
+sbn Dis HASH("SLS") Setting r6
+sbn Leuchte HASH("SLS") On 1
+sbn Speaker HASH("SLS") On 1
+sbn Speaker HASH("SLS") Mode 1
+j SLSAir
+nostorm:
+move r3 0
+sbn Speaker HASH("SLS") On 0
+sbn Leuchte HASH("SLS") On 0
+j ra
+incomming:
+sbn Speaker HASH("SLS") On 1
+sbn Speaker HASH("SLS") Mode 16
+sleep 3
+sbn Leuchte HASH("SLS") On 1
+sbn Speaker HASH("SLS") Mode 18
+sleep 2
+add r3 r3 1
+j ra
+batterie:
+lbn r1 Cableanalyser HASH("CAVE") PowerActual 1
+sbn Dis HASH("SLS") Mode 2
+sbn Dis HASH("SLS") Color 2
+sbn Dis HASH("SLS") Setting r1
+sleep 2
+lbn r1 Cableanalyser HASH("CAVE") PowerActual 1
+lbn r2 Cableanalyser HASH("CAER") PowerActual 1
+sub r1 r2 r1
+sbn Dis HASH("SLS") Mode 2
+sbn Dis HASH("SLS") Color -1
+sbn Dis HASH("SLS") Setting r1
+sleep 2
+lb r1 Batterie Ratio 0
+sbn Dis HASH("SLS") Mode 1
+sbn Dis HASH("SLS") Color 10
+sbn Dis HASH("SLS") Setting r1
+sleep 2
+j ra

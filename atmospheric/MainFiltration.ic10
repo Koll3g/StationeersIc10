@@ -1,0 +1,104 @@
+define PA 435685051
+define Filter -348054045
+define WarningLight -1535893860
+define Tank 1280378227
+define VP -321403609
+define Dis -815193061
+define Dial 554524804
+define TVP 1310794736
+define SLS -851746783
+start:
+jal Filterkontrolle
+jal Sauerstoffanreicherung
+jal Druckanpassung
+yield
+j start
+
+Druckanpassung:
+lbn r8 Tank HASH("TankAtemluft") Pressure 1
+lbn r10 Dial HASH("DialDruck") Setting 1
+mul r10 r10 1000
+brge r8 r10 2
+brlt r8 r10 3
+sbn TVP HASH("TVPLuft") On 0
+j ra
+sbn TVP HASH("TVPLuft") On 1
+j ra
+
+Sauerstoffanreicherung:
+lbn r7 Tank HASH("TankAtemluft") RatioOxygen 1
+brge r7 0.25 2
+brlt r7 0.25 3
+sbn TVP HASH("TVPO2") On 0
+j ra
+sbn TVP HASH("TVPO2") On 1
+j ra
+
+Filterkontrolle:
+s db Setting r2
+lbns r0 Filter HASH("Filtration1") 0 Quantity 1
+lbns r1 Filter HASH("Filtration1") 1 Quantity 1
+add r2 r1 r0
+brgt r2 0 3
+sbn WarningLight HASH("WarnungFilter1") On 1
+j Filterstop
+brgt r2 100 3
+sbn WarningLight HASH("WarnungFilter1") On 1
+sbn SLS HASH("SLS12") Setting 1
+#next filter
+lbns r3 Filter HASH("Filtration2") 0 Quantity 1
+brgt r3 0 3
+sbn WarningLight HASH("WarnungFilter2") On 1
+j Filterstop
+brgt r3 5 3
+sbn WarningLight HASH("WarnungFilter2") On 1
+sbn SLS HASH("SLS12") Setting 1
+#next filter
+lbns r4 Filter HASH("Filtration2") 1 Quantity 1
+brgt r4 0 3
+sbn WarningLight HASH("WarnungFilter2") On 1
+j Filterstop
+brgt r4 5 3
+sbn WarningLight HASH("WarnungFilter2") On 1
+sbn SLS HASH("SLS12") Setting 1
+#next filter
+lbns r5 Filter HASH("Filtration3") 0 Quantity 1
+brgt r5 0 3
+sbn WarningLight HASH("WarnungFilter3") On 1
+j Filterstop
+brgt r5 5 3
+sbn WarningLight HASH("WarnungFilter3") On 1
+sbn SLS HASH("SLS12") Setting 1
+#next filter
+lbns r6 Filter HASH("Filtration3") 1 Quantity 1
+brgt r6 0 3
+sbn WarningLight HASH("WarnungFilter3") On 1
+j Filterstop
+brgt r6 5 3
+sbn WarningLight HASH("WarnungFilter3") On 1
+sbn SLS HASH("SLS12") Setting 1
+#next filter
+sbn Filter HASH("Filtration1") On 1
+sbn Filter HASH("Filtration2") On 1
+sbn Filter HASH("Filtration3") On 1
+brle r2 100 2
+sbn WarningLight HASH("WarnungFilter1") On 0
+brle r3 5 3
+brle r4 5 2
+sbn WarningLight HASH("WarnungFilter2") On 0
+brle r5 5 3
+brle r6 5 2
+sbn WarningLight HASH("WarnungFilter3") On 0
+brle r2 100 6
+brle r3 5 5
+brle r4 5 4
+brle r5 5 3
+brle r6 5 2
+sbn SLS HASH("SLS12") Setting 0
+j ra
+Filterstop:
+sbn Filter HASH("Filtration1") On 0
+sbn Filter HASH("Filtration2") On 0
+sbn Filter HASH("Filtration3") On 0
+sbn SLS HASH("SLS12") Setting 2
+j ra
