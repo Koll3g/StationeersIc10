@@ -33,7 +33,7 @@ lbn roomTemperature -1252983604 HASH("AirSensor") Temperature Average
 brdns patInputGas 3 
 l inflowTemperature patInputGas Temperature
 jr 3
-move inflowTemperature
+move inflowTemperature roomTemperature
 add inflowTemperature inflowTemperature 273
 
 mul r0 roomCo2Ratio 1000
