@@ -46,8 +46,8 @@ sub r0 roomTemperature inflowTemperature
 abs r0 r0 # absolute temp-diff
 mul r1 r0 r0 # x^2
 mul r0 r1 r0 # x^3
-mul r0 r0 0.5 # 0.5x^3
-sqrt temperatureMultiplier r0 # 0.5x^(3/2) 
+mul r0 r0 0.75 # 0.75x^3
+sqrt temperatureMultiplier r0 # 0.75x^(3/2) 
 
 add r0 temperatureMultiplier co2RatioMultiplier
 
