@@ -1,0 +1,65 @@
+define ironSilo 154552
+define copperSilo 154575
+define coalSilo 154556
+define siliconSilo 154578
+define silverSilo 154779
+define goldSilo 154595
+define nickelSilo 154791
+define leadSilo 154764
+define cobaltSilo 154748
+
+alias silo3 r12
+alias silo3Amount r13
+
+alias currentRecipe r15
+alias currentAmount r14
+
+Loop:
+l r5 db Setting
+beq r5 0 Loop
+trunc currentRecipe r5
+sub currentAmount r5 currentRecipe
+mul currentAmount currentAmount 100
+round currentAmount currentAmount
+move silo3 0
+breq currentRecipe 15 2
+brne currentRecipe 13 3
+sd 661043 Setting -1
+jal DoLoad # doLoad -> return here
+mul silo3Amount currentAmount 4
+brne currentRecipe 13 2 # astroloy
+move silo3 cobaltSilo
+brne currentRecipe 14 2 # hastelloy
+move silo3 cobaltSilo
+brne currentRecipe 16 2 # waspaloy
+move silo3 nickelSilo
+brne currentRecipe 17 2 # waspaloy
+move silo3 cobaltSilo
+StartDoLoad:
+jal DoLoad # doLoad
+j Loop
+
+DoLoad:
+beq silo3 0 Finish
+sd silo3 ClearMemory 1
+ld r2 silo3 ExportCount
+brne r2 0 -1
+sub r6 silo3Amount 1
+sd silo3 Open 1
+yield
+MaybeCloseSilo:
+ld r2 silo3 ExportCount
+brlt r2 r6 -1
+sd silo3 Open 0
+yield
+ld r2 silo3 ExportCount
+brge r2 silo3Amount 4
+sd silo3 Open 1
+yield
+sd silo3 Open 0
+move silo3 0
+Finish:
+ld r4 661043 Setting
+breq r4 -1 -1
+s db Setting 0
+j ra

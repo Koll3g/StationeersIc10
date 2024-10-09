@@ -7,35 +7,29 @@ define goldSilo 154595
 define nickelSilo 154791
 define leadSilo 154764
 define cobaltSilo 154748
+
 alias silo1 r8
 alias silo1Amount r9
-alias silo2 r10
-alias silo2Amount r11
-alias silo3 r12
-alias silo3Amount r13
+
 alias currentRecipe r15
 alias currentAmount r14
+
+Loop:
 l r5 db Setting
-breq r5 0 -1
+beq r5 0 Loop
 trunc currentRecipe r5
 sub currentAmount r5 currentRecipe
 mul currentAmount currentAmount 100
 round currentAmount currentAmount
 move silo1 ironSilo
 mul silo1Amount currentAmount 3
-move silo2 coalSilo
-move silo2Amount currentAmount
-breq currentRecipe 15 4
-brne currentRecipe 13 5
+breq currentRecipe 15 3
+brne currentRecipe 13 4
 mul silo1Amount silo1Amount 2
-mul silo2Amount silo1Amount 2
-sd 661043 Setting 2
-jal 95 # doLoad -> return here
+sd 661043 Setting -1
+jal DoLoad # doLoad -> return here
 move silo1 0
 mul silo1Amount currentAmount 10
-move silo2 0
-mul silo2Amount currentAmount 5
-move silo3 0
 brne currentRecipe 1 2 # silicon
 move silo1 siliconSilo
 brne currentRecipe 2 2 # iron
@@ -50,78 +44,55 @@ brne currentRecipe 6 2 # lead
 move silo1 leadSilo
 brne currentRecipe 7 2 # nickel
 move silo1 nickelSilo
-bgt silo1 0 93 # doLoad
-brne currentRecipe 8 5 # steel
+bgt silo1 0 StartDoLoad # doLoad
+brne currentRecipe 8 4 # steel
 move silo1 ironSilo
 mul silo1Amount currentAmount 15
-move silo2 coalSilo
-bgt silo1 0 93 # doLoad
+bgt silo1 0 StartDoLoad # doLoad
 mul silo1Amount currentAmount 5
-brne currentRecipe 9 3 # electrum
+brne currentRecipe 9 2 # electrum
 move silo1 silverSilo
-move silo2 goldSilo
-brne currentRecipe 10 3 # invar
+brne currentRecipe 10 2 # invar
 move silo1 ironSilo
-move silo2 nickelSilo
-brne currentRecipe 11 3 # constantan
+brne currentRecipe 11 2 # constantan
 move silo1 copperSilo
-move silo2 nickelSilo
-brne currentRecipe 12 3 # solder
+brne currentRecipe 12 2 # solder
 move silo1 ironSilo
-move silo2 leadSilo
-bgt silo1 0 93 # doLoad
+bgt silo1 0 StartDoLoad # doLoad
 mul silo1Amount currentAmount 8
-mul silo2Amount currentAmount 4
-mul silo3Amount currentAmount 4
-brne currentRecipe 13 3 # astroloy
-move silo2 copperSilo
-move silo3 cobaltSilo
-brne currentRecipe 14 4 # hastelloy
+brne currentRecipe 14 2 # hastelloy
 move silo1 silverSilo
-move silo2 nickelSilo
-move silo3 cobaltSilo
-brne currentRecipe 15 3 # inconel
+brne currentRecipe 15 2 # inconel
 move silo1 goldSilo
-move silo2 nickelSilo
-brne currentRecipe 16 4 # waspaloy
+brne currentRecipe 16 2 # waspaloy
 move silo1 leadSilo
-move silo2 silverSilo
-move silo3 nickelSilo
-brne currentRecipe 17 4 # waspaloy
+brne currentRecipe 17 2 # waspaloy
 move silo1 siliconSilo
-move silo2 silverSilo
-move silo3 cobaltSilo
-jal 95 # doLoad
-j 17
-move r6 0
-breq silo1 0 4
+StartDoLoad:
+jal DoLoad # doLoad
+j Loop
+
+DoLoad:
+beq silo1 0 Finish
 sd silo1 ClearMemory 1
-add r6 r6 1
-sd silo1 Open 1
-breq silo2 0 4
-sd silo2 ClearMemory 1
-add r6 r6 1
-sd silo2 Open 1
-breq silo3 0 4
-sd silo3 ClearMemory 1
-add r6 r6 1
-sd silo3 Open 1
-breq silo1 0 5
 ld r0 silo1 ExportCount
-brlt r0 silo1Amount 3
+brne r0 0 -1
+sub r6 silo1Amount 1
+sd silo1 Open 1
+yield
+MaybeCloseSilo:
+ld r0 silo1 ExportCount
+brlt r0 r6 -1
 sd silo1 Open 0
-sub r6 r6 1
-breq silo2 0 5
-ld r1 silo2 ExportCount
-brlt r1 silo2Amount 3
-sd silo2 Open 0
-sub r6 r6 1
-breq silo3 0 5
-ld r2 silo1 ExportCount
-brlt r2 silo3Amount 3
-sd silo3 Open 0
-sub r6 r6 1
-bgt r6 0 108
+yield
+ld r0 silo1 ExportCount
+brge r0 silo1Amount 4
+sd silo1 Open 1
+yield
+sd silo1 Open 0
+s db Setting r0
+move silo1 0
+Finish:
 ld r4 661043 Setting
 breq r4 -1 -1
 s db Setting 0
