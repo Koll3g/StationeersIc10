@@ -1,15 +1,17 @@
-define ironSilo 154552
-define copperSilo 154575
-define coalSilo 154556
-define siliconSilo 154578
-define silverSilo 154779
-define goldSilo 154595
-define nickelSilo 154791
-define leadSilo 154764
-define cobaltSilo 154748
+define ironChuteValve 771720
+define copperChuteValve 771712
+define coalChuteValve 771715
+define siliconChuteValve 771710
+define silverChuteValve 771893
+define goldChuteValve 771703
+define nickelChuteValve 771890
+define leadChuteValve 771899
+define cobaltChuteValve 771901
 
-alias silo3 r12
-alias silo3Amount r13
+define stateMemory 661043
+
+alias chuteValve3 r12
+alias amount3 r13
 
 alias currentRecipe r15
 alias currentAmount r14
@@ -21,45 +23,35 @@ trunc currentRecipe r5
 sub currentAmount r5 currentRecipe
 mul currentAmount currentAmount 100
 round currentAmount currentAmount
-move silo3 0
+move chuteValve3 0
 breq currentRecipe 15 2
 brne currentRecipe 13 3
-sd 661043 Setting -1
+sd stateMemory Setting -1
 jal DoLoad # doLoad -> return here
-mul silo3Amount currentAmount 4
+mul amount3 currentAmount 4
 brne currentRecipe 13 2 # astroloy
-move silo3 cobaltSilo
+move chuteValve3 cobaltChuteValve
 brne currentRecipe 14 2 # hastelloy
-move silo3 cobaltSilo
+move chuteValve3 cobaltChuteValve
 brne currentRecipe 16 2 # waspaloy
-move silo3 nickelSilo
+move chuteValve3 nickelChuteValve
 brne currentRecipe 17 2 # waspaloy
-move silo3 cobaltSilo
+move chuteValve3 cobaltChuteValve
 StartDoLoad:
 jal DoLoad # doLoad
 j Loop
 
 DoLoad:
-beq silo3 0 Finish
-sd silo3 ClearMemory 1
-ld r2 silo3 ExportCount
-brne r2 0 -1
-sub r6 silo3Amount 1
-sd silo3 Open 1
+beq chuteValve3 0 Finish
+sd chuteValve3 Setting amount3
+sd chuteValve3 Open 1
 yield
-MaybeCloseSilo:
-ld r2 silo3 ExportCount
-brlt r2 r6 -1
-sd silo3 Open 0
-yield
-ld r2 silo3 ExportCount
-brge r2 silo3Amount 4
-sd silo3 Open 1
-yield
-sd silo3 Open 0
-move silo3 0
+ld r0 chuteValve3 Open
+brne r0 0 -2
+sd chuteValve3 Setting 0
+move chuteValve3 0
 Finish:
-ld r4 661043 Setting
+ld r4 stateMemory Setting
 breq r4 -1 -1
 s db Setting 0
 j ra
