@@ -1,0 +1,123 @@
+alias stateMemory d0
+alias furnace d1
+alias sorterLager d2
+alias sorterManuel d3
+alias oreFillerIc d4
+alias manuelOut d5
+
+alias ingotHash r11
+alias amount r12
+alias totalAmount r13
+
+alias instruction r15
+alias potat r14
+sll potat HASH("ItemPotato") 8
+
+yield
+Loop:
+l r0 oreFillerIc Setting 
+breq r0 0 -3 
+trunc r1 r0
+sub r0 r0 r1
+mul r0 r0 100
+round amount r0
+
+yield # wait for e.g. state memory
+l r2 stateMemory Setting
+
+brne r1 1 3 # silikoune
+move ingotHash Setting HASH("ItemSiliconIngot")
+mul totalAmount amount 500
+brne r1 2 3 # airoune
+s ingotHash Setting HASH("ItemIronIngot")
+mul totalAmount amount 500
+brne r1 3 3 # koppa
+s ingotHash Setting HASH("ItemCopperIngot")
+mul totalAmount amount 500
+brne r1 4 3 # silvo
+s ingotHash Setting HASH("ItemSilverIngot")
+mul totalAmount amount 500
+brne r1 5 3 # goulde
+s ingotHash Setting HASH("ItemGoldIngot")
+mul totalAmount amount 500
+brne r1 6 3 # liiid
+s ingotHash Setting HASH("ItemLeadIngot")
+mul totalAmount amount 500
+brne r1 7 3 # nickl
+s ingotHash Setting HASH("ItemNickelIngot")
+mul totalAmount amount 500
+brne r1 8 3 # schtiu
+s ingotHash Setting HASH("ItemSteelIngot")
+mul totalAmount amount 1000
+brne r1 9 3 # lktrm und dner man
+s ingotHash Setting HASH("ItemElectrumIngot")
+mul totalAmount amount 500
+brne r1 10 3 # invare
+s ingotHash Setting HASH("ItemInvarIngot")
+mul totalAmount amount 500
+brne r1 11 3 # konstantane
+s ingotHash Setting HASH("ItemConstantanIngot")
+mul totalAmount amount 500
+brne r1 12 3 # soldere
+s ingotHash Setting HASH("ItemSolderIngot")
+mul totalAmount amount 500
+brne r1 13 6 # ashitroloi
+s ingotHash Setting HASH("ItemAstroloyIngot")
+breq r2 2 3
+mul totalAmount amount 800
+jr 2
+mul totalAmount amount 400
+brne r1 14 3 # hashtelloi
+s ingotHash Setting HASH("ItemHastelloyIngot")
+mul totalAmount amount 800
+brne r1 15 6 # incel
+s ingotHash Setting HASH("ItemInconelIngot")
+breq r2 2 3
+mul totalAmount amount 800
+jr 2
+mul totalAmount amount 200
+brne r1 16 3 # washpaloi
+s ingotHash Setting HASH("ItemWaspaloyIngot")
+mul totalAmount amount 800
+brne r1 17 3 # shitelite
+s ingotHash Setting HASH("ItemStelliteIngot")
+mul totalAmount amount 800
+
+WaitForFinish:
+l r3 furnace Reagents
+seq r3 r3 totalAmount
+l r4 furance RecipeHash
+seq r4 r4 ingotHash
+and r5 r4 r3
+beq r5 1 Finish
+yield
+beq r5 0 WaitForFinish
+j Loop
+
+Finish:
+l r0 manuelOut Setting
+breq r0 1 11
+breq r2 2 4
+or instruction potat 1
+s db Setting 1
+jr 3
+or instruction potat 2
+s db Setting 2
+put sorterLager 0 instruction
+put sorterManuel 0 instruction
+jr 6
+s db Setting 3
+or instruction potat 2
+put sorterLager 0 instruction
+or instruction potat 1
+put sorterManuel 0 instruction
+
+s furnace Open 1
+yield
+l r0 furnace Reagents
+brgt r0 0 -3
+s furance Open 0
+l r0 stateMemory Setting
+sub r0 r0 1
+s stateMemory Setting r0
+j Loop

@@ -7,8 +7,6 @@ define goldChuteValve 771703
 define nickelChuteValve 771890
 define leadChuteValve 771899
 define cobaltChuteValve 771901
-define stateMemory 661043
-
 alias chuteValve1 r8
 alias amount1 r9
 alias chuteValve2 r10
@@ -17,22 +15,24 @@ alias chuteValve3 r12
 alias amount3 r13
 alias currentRecipe r15
 alias currentAmount r14
-Loop:
-l r0 db Setting
-beq r0 0 Loop
-trunc currentRecipe r0
-sub currentAmount r0 currentRecipe
+l r5 db Setting
+breq r5 0 -1
+trunc currentRecipe r5
+sub currentAmount r5 currentRecipe
 mul currentAmount currentAmount 100
 round currentAmount currentAmount
 move chuteValve1 ironChuteValve
 move chuteValve2 coalChuteValve
 mul amount1 currentAmount 3
 breq currentRecipe 15 4
-brne currentRecipe 13 5
+brne currentRecipe 13 6
 mul amount1 amount1 2
 mul amount2 amount2 2
-sd stateMemory Setting 2
-jal CheckAmount # doLoad -> return here
+sd 661043 Setting 2
+jal DoLoad # doLoad -> return here
+jr 2
+sd 661043 Setting 1
+move r5 0
 move chuteValve1 0
 move chuteValve2 0
 move chuteValve3 0
@@ -52,12 +52,12 @@ brne currentRecipe 6 2 # lead
 move chuteValve1 leadChuteValve
 brne currentRecipe 7 2 # nickel
 move chuteValve1 nickelChuteValve
-bgt chuteValve1 0 StartLoading
+bgt chuteValve1 0 96
 brne currentRecipe 8 5 # steel
 move chuteValve1 ironChuteValve
 move chuteValve2 coalChuteValve
 mul amount1 currentAmount 15
-bgt chuteValve1 0 StartLoading
+bgt chuteValve1 0 96
 mul amount1 currentAmount 5
 brne currentRecipe 9 3 # electrum
 move chuteValve1 silverChuteValve
@@ -71,7 +71,7 @@ move chuteValve2 nickelChuteValve
 brne currentRecipe 12 3 # solder
 move chuteValve1 ironChuteValve
 move chuteValve2 leadChuteValve
-bgt chuteValve1 0 StartLoading
+bgt chuteValve1 0 96
 mul amount1 currentAmount 8
 mul amount2 currentAmount 4
 mul amount3 currentAmount 4
@@ -93,9 +93,8 @@ brne currentRecipe 17 4 # waspaloy
 move chuteValve1 siliconChuteValve
 move chuteValve2 silverChuteValve
 move chuteValve3 cobaltChuteValve
-StartLoading:
 jal DoLoad # doLoad
-j Loop
+j 18
 DoLoad:
 breq chuteValve1 0 3
 sd chuteValve1 Setting amount1
@@ -119,10 +118,10 @@ yield
 ld r0 chuteValve3 Open
 brne r0 0 -2
 yield
-ld r0 stateMemory Setting
+ld r0 661043 Setting
 brgt r0 1 -2
 move chuteValve1 0
 move chuteValve2 0
 move chuteValve3 0
-s db Setting 0
+s db Setting r5
 j ra
