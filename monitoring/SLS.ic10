@@ -32,14 +32,16 @@ breq r4 0 4
 div r5 r4 10
 add r6 r5 15 #hier SLS-Nummer eintragen (SLS11=11)
 j Alarm
-#lbn r4 MEM HASH("SLS13") Setting 1
-#Platzhalter für weitere Teilnehmer
-#etc. einfach von oben kopieren
-
-
-
-
-
+lbn r4 MEM HASH("SLS13") Setting 1
+breq r4 0 4
+div r5 r4 10
+add r6 r5 13 #hier SLS-Nummer eintragen (SLS11=11)
+j Alarm
+lbn r4 MEM HASH("SLS99") Setting 1
+breq r4 0 4
+div r5 r4 10
+add r6 r5 99 #hier SLS-Nummer eintragen (SLS11=11)
+j Alarm
 Alarm:
 beqal r4 2 Alarmair
 beqal r4 1 Warnungair
