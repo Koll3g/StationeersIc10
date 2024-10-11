@@ -63,7 +63,7 @@ j Main
 
 EmptyingColdAir:
 move waitCounterDoor 0
-sbn AIR_VENT COLD_AIR_VENTS Setting 0 #double check
+sbn AIR_VENT COLD_AIR_VENTS Mode 1 #double check
 sbn AIR_VENT COLD_AIR_VENTS On 1
 lbn r0 GAS_SENSOR GAS_SENSOR_LANDING_AREA Pressure Maximum
 beq r0 0 RoomEmptyCold
@@ -80,7 +80,7 @@ j RoomEmptyReturn
 FillingBreathableAir:
 move waitCounterColdAir 0
 sbn AIR_VENT COLD_AIR_VENTS On 0
-sbn AIR_VENT BREATHABLE_AIR_VENTS Setting 0 #double check
+sbn AIR_VENT BREATHABLE_AIR_VENTS Mode 0 #double check
 sbn AIR_VENT BREATHABLE_AIR_VENTS On 1
 lbn r0 GAS_SENSOR GAS_SENSOR_LANDING_AREA Pressure Minimum
 bge r0 100 RoomFullBreathable
@@ -104,7 +104,7 @@ breq r0 0 2
 j Main
 
 EmptyingBreathableAir:
-sbn AIR_VENT BREATHABLE_AIR_VENTS Setting 1 #double check
+sbn AIR_VENT BREATHABLE_AIR_VENTS Mode 1 #double check
 sbn AIR_VENT BREATHABLE_AIR_VENTS On 1
 lbn r0 GAS_SENSOR GAS_SENSOR_LANDING_AREA Pressure Maximum
 beq r0 0 RoomEmptyBreathable

@@ -1,18 +1,18 @@
-define ironSilo 154552
-define copperSilo 154575
-define coalSilo 154556
-define siliconSilo 154578
-define silverSilo 154779
-define goldSilo 154595
-define nickelSilo 154791
-define leadSilo 154764
-define cobaltSilo 154748
-alias silo1 r8
-alias silo1Amount r9
-alias silo2 r10
-alias silo2Amount r11
-alias silo3 r12
-alias silo3Amount r13
+define ironChuteValve 771720
+define copperChuteValve 771712
+define coalChuteValve 771715
+define siliconChuteValve 771710
+define silverChuteValve 771893
+define goldChuteValve 771703
+define nickelChuteValve 771890
+define leadChuteValve 771899
+define cobaltChuteValve 771901
+alias chuteValve1 r8
+alias amount1 r9
+alias chuteValve2 r10
+alias amount2 r11
+alias chuteValve3 r12
+alias amount3 r13
 alias currentRecipe r15
 alias currentAmount r14
 l r5 db Setting
@@ -21,108 +21,107 @@ trunc currentRecipe r5
 sub currentAmount r5 currentRecipe
 mul currentAmount currentAmount 100
 round currentAmount currentAmount
-move silo1 ironSilo
-mul silo1Amount currentAmount 3
-move silo2 coalSilo
-move silo2Amount currentAmount
+move chuteValve1 ironChuteValve
+move chuteValve2 coalChuteValve
+mul amount1 currentAmount 3
 breq currentRecipe 15 4
-brne currentRecipe 13 5
-mul silo1Amount silo1Amount 2
-mul silo2Amount silo1Amount 2
+brne currentRecipe 13 6
+mul amount1 amount1 2
+mul amount2 amount2 2
 sd 661043 Setting 2
-jal 95 # doLoad -> return here
-move silo1 0
-mul silo1Amount currentAmount 10
-move silo2 0
-mul silo2Amount currentAmount 5
-move silo3 0
+jal DoLoad # doLoad -> return here
+jr 2
+sd 661043 Setting 1
+move r5 0
+move chuteValve1 0
+move chuteValve2 0
+move chuteValve3 0
+mul amount1 currentAmount 10
+mul amount2 currentAmount 5
 brne currentRecipe 1 2 # silicon
-move silo1 siliconSilo
+move chuteValve1 siliconChuteValve
 brne currentRecipe 2 2 # iron
-move silo1 ironSilo
+move chuteValve1 ironChuteValve
 brne currentRecipe 3 2 # copper
-move silo1 copperSilo
+move chuteValve1 copperChuteValve
 brne currentRecipe 4 2 # silver
-move silo1 silverSilo
+move chuteValve1 silverChuteValve
 brne currentRecipe 5 2 # gold
-move silo1 goldSilo
+move chuteValve1 goldChuteValve
 brne currentRecipe 6 2 # lead
-move silo1 leadSilo
+move chuteValve1 leadChuteValve
 brne currentRecipe 7 2 # nickel
-move silo1 nickelSilo
-bgt silo1 0 93 # doLoad
+move chuteValve1 nickelChuteValve
+bgt chuteValve1 0 96
 brne currentRecipe 8 5 # steel
-move silo1 ironSilo
-mul silo1Amount currentAmount 15
-move silo2 coalSilo
-bgt silo1 0 93 # doLoad
-mul silo1Amount currentAmount 5
+move chuteValve1 ironChuteValve
+move chuteValve2 coalChuteValve
+mul amount1 currentAmount 15
+bgt chuteValve1 0 96
+mul amount1 currentAmount 5
 brne currentRecipe 9 3 # electrum
-move silo1 silverSilo
-move silo2 goldSilo
+move chuteValve1 silverChuteValve
+move chuteValve2 goldChuteValve
 brne currentRecipe 10 3 # invar
-move silo1 ironSilo
-move silo2 nickelSilo
+move chuteValve1 ironChuteValve
+move chuteValve2 nickelChuteValve
 brne currentRecipe 11 3 # constantan
-move silo1 copperSilo
-move silo2 nickelSilo
+move chuteValve1 copperChuteValve
+move chuteValve2 nickelChuteValve
 brne currentRecipe 12 3 # solder
-move silo1 ironSilo
-move silo2 leadSilo
-bgt silo1 0 93 # doLoad
-mul silo1Amount currentAmount 8
-mul silo2Amount currentAmount 4
-mul silo3Amount currentAmount 4
+move chuteValve1 ironChuteValve
+move chuteValve2 leadChuteValve
+bgt chuteValve1 0 96
+mul amount1 currentAmount 8
+mul amount2 currentAmount 4
+mul amount3 currentAmount 4
 brne currentRecipe 13 3 # astroloy
-move silo2 copperSilo
-move silo3 cobaltSilo
+move chuteValve2 copperChuteValve
+move chuteValve3 cobaltChuteValve
 brne currentRecipe 14 4 # hastelloy
-move silo1 silverSilo
-move silo2 nickelSilo
-move silo3 cobaltSilo
+move chuteValve1 silverChuteValve
+move chuteValve2 nickelChuteValve
+move chuteValve3 cobaltChuteValve
 brne currentRecipe 15 3 # inconel
-move silo1 goldSilo
-move silo2 nickelSilo
+move chuteValve1 goldChuteValve
+move chuteValve2 nickelChuteValve
 brne currentRecipe 16 4 # waspaloy
-move silo1 leadSilo
-move silo2 silverSilo
-move silo3 nickelSilo
+move chuteValve1 leadChuteValve
+move chuteValve2 silverChuteValve
+move chuteValve3 nickelChuteValve
 brne currentRecipe 17 4 # waspaloy
-move silo1 siliconSilo
-move silo2 silverSilo
-move silo3 cobaltSilo
-jal 95 # doLoad
-j 17
-move r6 0
-breq silo1 0 4
-sd silo1 ClearMemory 1
-add r6 r6 1
-sd silo1 Open 1
-breq silo2 0 4
-sd silo2 ClearMemory 1
-add r6 r6 1
-sd silo2 Open 1
-breq silo3 0 4
-sd silo3 ClearMemory 1
-add r6 r6 1
-sd silo3 Open 1
-breq silo1 0 5
-ld r0 silo1 ExportCount
-brlt r0 silo1Amount 3
-sd silo1 Open 0
-sub r6 r6 1
-breq silo2 0 5
-ld r1 silo2 ExportCount
-brlt r1 silo2Amount 3
-sd silo2 Open 0
-sub r6 r6 1
-breq silo3 0 5
-ld r2 silo1 ExportCount
-brlt r2 silo3Amount 3
-sd silo3 Open 0
-sub r6 r6 1
-bgt r6 0 108
-ld r4 661043 Setting
-breq r4 -1 -1
-s db Setting 0
+move chuteValve1 siliconChuteValve
+move chuteValve2 silverChuteValve
+move chuteValve3 cobaltChuteValve
+jal DoLoad # doLoad
+j 18
+DoLoad:
+breq chuteValve1 0 3
+sd chuteValve1 Setting amount1
+sd chuteValve1 Open 1
+breq chuteValve2 0 3
+sd chuteValve2 Setting amount2
+sd chuteValve2 Open 1
+breq chuteValve3 0 3
+sd chuteValve3 Setting amount3
+sd chuteValve3 Open 1
+breq chuteValve1 0 4
+yield
+ld r0 chuteValve1 Open
+brne r0 0 -2
+breq chuteValve2 0 4
+yield
+ld r0 chuteValve2 Open
+brne r0 0 -2
+breq chuteValve3 0 4
+yield
+ld r0 chuteValve3 Open
+brne r0 0 -2
+yield
+ld r0 661043 Setting
+brgt r0 1 -2
+move chuteValve1 0
+move chuteValve2 0
+move chuteValve3 0
+s db Setting r5
 j ra

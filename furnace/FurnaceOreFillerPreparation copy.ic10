@@ -1,0 +1,44 @@
+alias dialIngot d0
+alias dialAmount d1
+alias displayIngot d2
+alias displayAmount d3
+
+Loop:
+l r0 dialIngot Setting
+brne r0 0 2 # OFF!!
+s displayIngot Setting 0
+brne r0 1 2 # silikoune
+s displayIngot Setting HASH("ItemSiliconIngot")
+brne r0 2 2 # airoune
+s displayIngot Setting HASH("ItemIronIngot")
+brne r0 3 2 # koppa
+s displayIngot Setting HASH("ItemCopperIngot")
+brne r0 4 2 # silvo
+s displayIngot Setting HASH("ItemSilverIngot")
+brne r0 5 2 # goulde
+s displayIngot Setting HASH("ItemGoldIngot")
+brne r0 6 2 # liiid
+s displayIngot Setting HASH("ItemLeadIngot")
+brne r0 7 2 # nickl
+s displayIngot Setting HASH("ItemNickelIngot")
+brne r0 8 2 # schtiu
+s displayIngot Setting HASH("ItemSteelIngot")
+brne r0 9 2 # lktrm und dner man
+s displayIngot Setting HASH("ItemElectrumIngot")
+brne r0 10 2 # invare
+s displayIngot Setting HASH("ItemInvarIngot")
+brne r0 11 2 # konstantane
+s displayIngot Setting HASH("ItemConstantanIngot")
+brne r0 12 2 # soldere
+s displayIngot Setting HASH("ItemSolderIngot")
+brne r0 13 2 # ashitroloi
+s displayIngot Setting HASH("ItemAstroloyIngot")
+brne r0 14 2 # hashtelloi
+s displayIngot Setting HASH("ItemHastelloyIngot")
+brne r0 15 2 # incel
+s displayIngot Setting HASH("ItemInconelIngot")
+brne r0 16 2 # washpaloi
+s displayIngot Setting HASH("ItemWaspaloyIngot")
+brne r0 17 2 # shitelite
+s displayIngot Setting HASH("ItemStelliteIngot")
+j Loop
