@@ -1,1 +1,45 @@
-ProductionRoom added Doors 3 and 4
+define Sensor 322782515 #proxy Sensor
+define Licht 555215790 #Lichter
+define Autolathe 336213101
+define ElectronicsPrinter 1307165496
+define HydraulicPipeBender -1888248335
+define ToolManufactory -465741100
+define SecurityPrinter -641491515
+define Stacker -2020231820
+define Dial 554524804
+define Vent -1129453144
+define Trigger 568800213
+define Door -324331872
+sbn Dial HASH("DialOut") Mode 150
+sbn Dial HASH("DialIn") Mode 150
+start:
+lbn r9 Trigger HASH("Trigger1") Activate 1
+sbn Door HASH("Door1") Open r9
+lbn r9 Trigger HASH("Trigger2") Activate 1
+sbn Door HASH("Door2") Open r9
+lbn r9 Trigger HASH("Trigger3") Activate 1
+sbn Door HASH("Door3") Open r9
+lbn r9 Trigger HASH("Trigger4") Activate 1
+sbn Door HASH("Door4") Open r9
+lbn r0 Sensor HASH("Anwesenheit") Activate 1
+breq r0 r1 3
+lbn r1 Sensor HASH("Anwesenheit") Activate 1
+sbn Licht HASH("Wall Light (Long Wide)") On r1
+lb r2 Autolathe On 1
+sbn Stacker HASH("StackerAL") On r2
+lb r3 ElectronicsPrinter On 1
+sbn Stacker HASH("StackerEP") On r3
+lb r4 HydraulicPipeBender On 1
+sbn Stacker HASH("StackerHPB") On r4
+lb r5 ToolManufactory On 1
+sbn Stacker HASH("StackerTM") On r5
+lb r6 SecurityPrinter On 1
+sbn Stacker HASH("StackerSP") On r6
+lbn r7 Dial HASH("DialIn") Setting 1
+sbn Vent HASH("VentIn") PressureExternal r7
+sbn Vent HASH("VentIn") Mode 1
+lbn r8 Dial HASH("DialOut") Setting 1
+sbn Vent HASH("VentOut") PressureExternal r8
+sbn Vent HASH("VentOut") Mode 0
+yield
+j start
