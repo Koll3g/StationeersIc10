@@ -5,7 +5,8 @@ define ElectronicsPrinter 1307165496
 define HydraulicPipeBender -1888248335
 define ToolManufactory -465741100
 define SecurityPrinter -641491515
-define Stacker -2020231820
+define RocketManufactory 1781051034
+define Stacker 1585641623
 define Dial 554524804
 define Vent -1129453144
 define Trigger 568800213
@@ -41,6 +42,8 @@ lbn r8 ToolManufactory HASH("Tool Manufactory") On 1
 sbn Stacker HASH("StackerTM") On r8
 lbn r9 SecurityPrinter HASH("Security Printer") On 1
 sbn Stacker HASH("StackerSP") On r9
+lbn r12 RocketManufactory HASH("Rocket Manufactory") On 1
+sbn Stacker HASH("StackerRM") On r12
 lbn r10 Dial HASH("DialIn") Setting 1
 sbn Vent HASH("VentIn") PressureExternal r10
 sbn Vent HASH("VentIn") Mode 1
