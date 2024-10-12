@@ -25,21 +25,27 @@ lbn r0 Sensor HASH("Anwesenheit") Activate 1
 breq r0 r1 3
 lbn r1 Sensor HASH("Anwesenheit") Activate 1
 sbn Licht HASH("Wall Light (Long Wide)") On r1
-lb r2 Autolathe On 1
-sbn Stacker HASH("StackerAL") On r2
-lb r3 ElectronicsPrinter On 1
-sbn Stacker HASH("StackerEP") On r3
-lb r4 HydraulicPipeBender On 1
-sbn Stacker HASH("StackerHPB") On r4
-lb r5 ToolManufactory On 1
-sbn Stacker HASH("StackerTM") On r5
-lb r6 SecurityPrinter On 1
-sbn Stacker HASH("StackerSP") On r6
-lbn r7 Dial HASH("DialIn") Setting 1
-sbn Vent HASH("VentIn") PressureExternal r7
+lbn r2 Autolathe HASH("Autolathe 1") On 1
+sbn Stacker HASH("StackerAL 1") On r2
+lbn r3 Autolathe HASH("Autolathe 2") On 1
+sbn Stacker HASH("StackerAL 2") On r3
+lbn r4 ElectronicsPrinter HASH("Electronics Printer 1") On 1
+sbn Stacker HASH("StackerEP 1") On r4
+lbn r5 ElectronicsPrinter HASH("Electronics Printer 2") On 1
+sbn Stacker HASH("StackerEP 2") On r5
+lbn r6 HydraulicPipeBender HASH("Hydraulic Pipe Bender 1") On 1
+sbn Stacker HASH("StackerHPB 1") On r6
+lbn r7 HydraulicPipeBender HASH("Hydraulic Pipe Bender 2") On 1
+sbn Stacker HASH("StackerHPB 2") On r7
+lbn r8 ToolManufactory HASH("Tool Manufactory") On 1
+sbn Stacker HASH("StackerTM") On r8
+lbn r9 SecurityPrinter HASH("Security Printer") On 1
+sbn Stacker HASH("StackerSP") On r9
+lbn r10 Dial HASH("DialIn") Setting 1
+sbn Vent HASH("VentIn") PressureExternal r10
 sbn Vent HASH("VentIn") Mode 1
-lbn r8 Dial HASH("DialOut") Setting 1
-sbn Vent HASH("VentOut") PressureExternal r8
+lbn r11 Dial HASH("DialOut") Setting 1
+sbn Vent HASH("VentOut") PressureExternal r11
 sbn Vent HASH("VentOut") Mode 0
 yield
 j start
