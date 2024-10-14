@@ -1,0 +1,52 @@
+define HV 958056199 #Harvie
+define HD -1841632400 #Hydro Device
+define HVactive r0 #aktiver Harvie
+define HDactive r1 #aktives Device
+
+select:
+move r0 HASH("HV1.1")
+move r1 HASH("HD1.1")
+jal action
+move r0 HASH("HV1.2")
+move r1 HASH("HD1.2")
+jal action
+move r0 HASH("HV1.3")
+move r1 HASH("HD1.3")
+jal action
+move r0 HASH("HV1.4")
+move r1 HASH("HD1.4")
+jal action
+move r0 HASH("HV1.5")
+move r1 HASH("HD1.5")
+jal action
+move r0 HASH("HV1.6")
+move r1 HASH("HD1.6")
+jal action
+move r0 HASH("HV1.7")
+move r1 HASH("HD1.7")
+jal action
+move r0 HASH("HV1.8")
+move r1 HASH("HD1.8") 
+jal action
+move r0 HASH("HV1.9")
+move r1 HASH("HD1.9")
+jal action
+move r0 HASH("HV1.10")
+move r1 HASH("HD1.10")
+jal action
+j select
+
+action:
+lbns r2 HD HDactive 0 Occupied 1 #auslesen ob etwas gesetzt ist
+beq r2 0 plant #setzen wenn leer
+lbns r2 HD HDactive 0 Mature 1 #auslesen ob erntereif
+beq r2 1 harvest
+j ra
+
+plant:
+sbn HV HVactive Plant 1
+j ra
+
+harvest:
+sbn HV HVactive Harvest 1
+j ra
