@@ -1,0 +1,42 @@
+alias ingotMemory d0
+
+define silo 1155865682
+
+Loop:
+lbn r0 silo HASH("SiliconSilo") Quantity Average
+s ingotMemory:0 Channel0 r0
+lbn r0 silo HASH("SchtiuSilo") Quantity Average
+s ingotMemory:0 Channel1 r0
+lbn r0 silo HASH("IronSilo") Quantity Average
+s ingotMemory:0 Channel2 r0
+lbn r0 silo HASH("CopperSilo") Quantity Average
+s ingotMemory:0 Channel3 r0
+lbn r0 silo HASH("SilverSilo") Quantity Average
+s ingotMemory:0 Channel4 r0
+lbn r0 silo HASH("GoldSilo") Quantity Average
+s ingotMemory:0 Channel5 r0
+lbn r0 silo HASH("LeadSilo") Quantity Average
+s ingotMemory:0 Channel6 r0
+lbn r0 silo HASH("NickelSilo") Quantity Average
+s ingotMemory:0 Channel7 r0
+lbn r0 silo HASH("ElectrumSilo") Quantity Average
+s ingotMemory Setting r0
+
+lbn r0 silo HASH("InvarSilo") Quantity Average
+s ingotMemory:1 Channel0 r0
+lbn r0 silo HASH("ConstantanSilo") Quantity Average
+s ingotMemory:1 Channel1 r0
+lbn r0 silo HASH("SolderSilo") Quantity Average
+s ingotMemory:1 Channel2 r0
+lbn r0 silo HASH("AstroloySilo") Quantity Average
+s ingotMemory:1 Channel3 r0
+lbn r0 silo HASH("HastelloySilo") Quantity Average
+s ingotMemory:1 Channel4 r0
+lbn r0 silo HASH("InconelSilo") Quantity Average
+s ingotMemory:1 Channel5 r0
+lbn r0 silo HASH("WaspaloySilo") Quantity Average
+s ingotMemory:1 Channel6 r0
+lbn r0 silo HASH("StelliteSilo") Quantity Average
+s ingotMemory:1 Channel7 r0
+yield
+j Loop

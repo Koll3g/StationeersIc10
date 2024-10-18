@@ -1,0 +1,99 @@
+define SILO 1155865682
+
+alias orderHandlerIc d0
+
+alias silo r11
+alias amountDone r12
+alias currentRecipe r13
+alias currentAmount r14
+
+s db Setting 2
+move r0 -1
+add r0 r0 1
+put db r0 0
+brlt r0 511 -2
+put orderHandlerIc 0 0
+s db Setting 0
+
+move r7 0
+move r8 0
+
+Loop:
+div r9 r8 100
+add r9 r7 r9
+s d1 Setting r9
+get r0 db 0
+bgtal r0 0 ExecuteOrder
+bgtal r0 0 RearrangeOrders
+j Loop
+
+ExecuteOrder:
+trunc currentRecipe r0
+sub currentAmount r0 currentRecipe
+mul currentAmount currentAmount 100
+round currentAmount currentAmount
+brne currentRecipe 1 2 # silicon
+move silo HASH("SiliconSilo")
+brne currentRecipe 2 2 # iron
+move silo HASH("IronSilo")
+brne currentRecipe 3 2 # copper
+move silo HASH("CopperSilo")
+brne currentRecipe 4 2 # silver
+move silo HASH("SilverSilo")
+brne currentRecipe 5 2 # gold
+move silo HASH("GoldSilo")
+brne currentRecipe 6 2 # lead
+move silo HASH("LeadSilo")
+brne currentRecipe 7 2 # nickel
+move silo HASH("NickelSilo")
+brne currentRecipe 8 2 # steel
+move silo HASH("SchtiuSilo")
+brne currentRecipe 9 2 # electrum
+move silo HASH("ElectrumSilo")
+brne currentRecipe 10 2 # invar
+move silo HASH("InvarSilo")
+brne currentRecipe 11 2 # constantan
+move silo HASH("ConstantanSilo")
+brne currentRecipe 12 2 # solder
+move silo HASH("SolderSilo")
+brne currentRecipe 13 2 # astroloy
+move silo HASH("AstroloySilo")
+brne currentRecipe 14 2 # hastelloy
+move silo HASH("HastelloySilo")
+brne currentRecipe 15 2 # inconel
+move silo HASH("InconelSilo")
+brne currentRecipe 16 2 # waspaloy
+move silo HASH("WaspaloySilo")
+brne currentRecipe 17 2 # stellite
+move silo HASH("StelliteSilo")
+move amountDone 0
+add r7 r7 1
+yield
+ExecuteLoop:
+sbn SILO silo Open 1
+lbn r5 SILO silo Open 0
+brne r5 1 -2
+sbn SILO silo Open 0
+add amountDone amountDone 1
+add r8 r8 1
+yield
+blt amountDone currentAmount ExecuteLoop
+j ra
+
+RearrangeOrders:
+s db Setting 1
+yield
+move r15 1
+get r5 orderHandlerIc 0
+RearrangeLoop:
+get r0 db r15
+sub r15 r15 1
+put db r15 r0
+add r15 r15 2
+blt r15 r5 RearrangeLoop
+sub r5 r5 1
+put db r5 0
+put orderHandlerIc 0 r5
+yield
+s db Setting 0
+j ra
