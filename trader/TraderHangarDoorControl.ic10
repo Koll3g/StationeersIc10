@@ -1,21 +1,23 @@
 define COLD_AIR_VENTS HASH("ColdAirVents")
-define BREATHABLE_AIR_VENTS HASH("BreathableAirVents")
+define BREATH_AIR_VENTS HASH("BreathableAirVents")
 define GAS_SENSOR_LANDING_AREA HASH("GasSensorLandingArea")
 define DOOR_SWITCH HASH("Switch Hangar Doors")
-define PRESSURE_IN_AIR_SUPPLY HASH("PressureInAirSupply")
+define PRESS_IN_AIR_SUPPLY HASH("PressureInAirSupply")
+define PRESS_OUT_AIR_SUPPLY HASH("PressureOutAirSupply")
 define HANGAR_DOOR_LARGE -1351081801
 define HANGAR_DOOR_MEDIUM -566348148
 define AIR_VENT -785498334
 define GAS_SENSOR -1252983604
 define SWITCH 321604921
-define PRESSURE_REGULA 209854039
+define PRESS_REGULA 209854039
+define BACK_PRESS_REGULA -1149857558
 define STATE_UNDEF 0
 define STATE_COLD_ENV_DOOR_OPEN 1
 define STATE_DOOR_CLOSING 2
 define STATE_EMPTYING_COLD_AIR 3
-define STATE_FILLING_BREATHABLE_AIR 4
-define STATE_BREATHABLE_ENV_DOOR_CLOSED 5
-define STATE_EMPTYING_BREATHABLE_AIR 6
+define STATE_FILLING_BREATH_AIR 4
+define STATE_BREATH_ENV_DOOR_CLOSED 5
+define STATE_EMPTYING_BREATH_AIR 6
 define STATE_DOOR_OPENING 7
 define WAITING_TICKS 5
 alias waitCounterDoor r15
@@ -28,9 +30,9 @@ beq state STATE_UNDEF Undef
 beq state STATE_COLD_ENV_DOOR_OPEN ColdEnvDoorOpen
 beq state STATE_DOOR_CLOSING DoorClosing
 beq state STATE_EMPTYING_COLD_AIR EmptyingColdAir
-beq state STATE_FILLING_BREATHABLE_AIR FillingBreathableAir
-beq state STATE_BREATHABLE_ENV_DOOR_CLOSED BreathableEnvDoorClosed
-beq state STATE_EMPTYING_BREATHABLE_AIR EmptyingBreathableAir
+beq state STATE_FILLING_BREATH_AIR FillingBreathableAir
+beq state STATE_BREATH_ENV_DOOR_CLOSED BreathableEnvDoorClosed
+beq state STATE_EMPTYING_BREATH_AIR EmptyingBreathableAir
 beq state STATE_DOOR_OPENING DoorOpening
 s db Setting STATE_UNDEF
 j Main
@@ -39,12 +41,13 @@ sb AIR_VENT On 0
 lbn r0 GAS_SENSOR GAS_SENSOR_LANDING_AREA Temperature Average
 s db Setting STATE_COLD_ENV_DOOR_OPEN
 brle r0 275 2
-    s db Setting STATE_BREATHABLE_ENV_DOOR_CLOSED
+    s db Setting STATE_BREATH_ENV_DOOR_CLOSED
 j Main
 ColdEnvDoorOpen:
 sb HANGAR_DOOR_MEDIUM Open 1
 sb HANGAR_DOOR_LARGE Open 1
-sbn PRESSURE_REGULA PRESSURE_IN_AIR_SUPPLY On 1
+sbn PRESS_REGULA PRESS_IN_AIR_SUPPLY On 1
+sbn BACK_PRESS_REGULA PRESS_OUT_AIR_SUPPLY On 1
 lbn r0 SWITCH DOOR_SWITCH Open Average
 breq r0 0 2
     s db Setting STATE_DOOR_CLOSING
@@ -66,7 +69,7 @@ ble r0 0.001 RoomEmptyCold
 move waitCounterColdAir 0
 RoomEmptyColdReturn:
 brlt waitCounterColdAir WAITING_TICKS 2
-    s db Setting STATE_FILLING_BREATHABLE_AIR
+    s db Setting STATE_FILLING_BREATH_AIR
 j Main
 RoomEmptyCold:
 add waitCounterColdAir waitCounterColdAir 1
@@ -74,16 +77,17 @@ yield
 j RoomEmptyColdReturn
 FillingBreathableAir:
 move waitCounterColdAir 0
-sbn PRESSURE_REGULA PRESSURE_IN_AIR_SUPPLY On 0
+sbn PRESS_REGULA PRESS_IN_AIR_SUPPLY On 0
+sbn BACK_PRESS_REGULA PRESS_OUT_AIR_SUPPLY On 0
 sbn AIR_VENT COLD_AIR_VENTS On 0
-sbn AIR_VENT BREATHABLE_AIR_VENTS Mode 0
-sbn AIR_VENT BREATHABLE_AIR_VENTS On 1
+sbn AIR_VENT BREATH_AIR_VENTS Mode 0
+sbn AIR_VENT BREATH_AIR_VENTS On 1
 lbn r0 GAS_SENSOR GAS_SENSOR_LANDING_AREA Pressure Minimum
 bge r0 90 RoomFullBreathable
 move waitCounterBreathableAir 0
 RoomFullBreathableReturn:
 brlt waitCounterBreathableAir WAITING_TICKS 2
-    s db Setting STATE_BREATHABLE_ENV_DOOR_CLOSED
+    s db Setting STATE_BREATH_ENV_DOOR_CLOSED
 j Main
 RoomFullBreathable:
 add waitCounterBreathableAir waitCounterBreathableAir 1
@@ -92,18 +96,18 @@ j RoomFullBreathableReturn
 BreathableEnvDoorClosed:
 sb HANGAR_DOOR_MEDIUM Open 0
 sb HANGAR_DOOR_LARGE Open 0
-sbn PRESSURE_REGULA PRESSURE_IN_AIR_SUPPLY On 0
+sbn PRESS_REGULA PRESS_IN_AIR_SUPPLY On 0
 move waitCounterBreathableAir 0
-sbn AIR_VENT BREATHABLE_AIR_VENTS On 0
+sbn AIR_VENT BREATH_AIR_VENTS On 0
 lbn r0 SWITCH DOOR_SWITCH Open Average
 breq r0 1 2
-    s db Setting STATE_EMPTYING_BREATHABLE_AIR
+    s db Setting STATE_EMPTYING_BREATH_AIR
 j Main
 EmptyingBreathableAir:
-sbn AIR_VENT BREATHABLE_AIR_VENTS Mode 1
-sbn AIR_VENT BREATHABLE_AIR_VENTS On 1
+sbn AIR_VENT BREATH_AIR_VENTS Mode 1
+sbn AIR_VENT BREATH_AIR_VENTS On 1
 lbn r0 GAS_SENSOR GAS_SENSOR_LANDING_AREA Pressure Maximum
-beq r0 0 RoomEmptyBreathable
+ble r0 0.001 RoomEmptyBreathable
 move waitCounterBreathableAir 0
 RoomEmptyBreathableReturn:
 brlt waitCounterBreathableAir WAITING_TICKS 2
@@ -115,7 +119,7 @@ yield
 j RoomEmptyBreathableReturn
 DoorOpening:
 move waitCounterBreathableAir 0
-sbn AIR_VENT BREATHABLE_AIR_VENTS On 0
+sbn AIR_VENT BREATH_AIR_VENTS On 0
 sb HANGAR_DOOR_MEDIUM Open 1
 sb HANGAR_DOOR_LARGE Open 1
 s db Setting STATE_COLD_ENV_DOOR_OPEN
