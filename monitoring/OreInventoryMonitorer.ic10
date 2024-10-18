@@ -1,0 +1,25 @@
+define SILO 1155865682
+
+alias oreSiloMemory d0
+
+Loop:
+lbn r0 SILO HASH("SiloIron") Quantity Sum
+s oreSiloMemory:1 Channel0 r0
+lbn r0 SILO HASH("SiloCopper") Quantity Sum
+s oreSiloMemory:1 Channel1 r0
+lbn r0 SILO HASH("SiloCoal") Quantity Sum
+s oreSiloMemory:1 Channel2 r0
+lbn r0 SILO HASH("SiloSilicon") Quantity Sum
+s oreSiloMemory:1 Channel3 r0
+lbn r0 SILO HASH("SiloSilver") Quantity Sum
+s oreSiloMemory:1 Channel4 r0
+lbn r0 SILO HASH("SiloGold") Quantity Sum
+s oreSiloMemory:1 Channel5 r0
+lbn r0 SILO HASH("SiloNickel") Quantity Sum
+s oreSiloMemory:1 Channel6 r0
+lbn r0 SILO HASH("SiloLead") Quantity Sum
+s oreSiloMemory:1 Channel7 r0
+lbn r0 SILO HASH("SiloCobalt") Quantity Sum
+s oreSiloMemory Setting r0
+yield
+j Loop

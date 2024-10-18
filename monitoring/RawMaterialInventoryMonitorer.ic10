@@ -1,0 +1,109 @@
+define BUTTON 1220484876
+
+alias orderIc d0
+
+alias selectedIngot r1
+
+s db Setting 0
+Loop:
+lbn r0 BUTTON HASH("SiliconIngotOrderButton") Setting 0
+breq r0 0 4
+move selectedIngot 1
+jal Oada
+sbn BUTTON HASH("SiliconIngotOrderButton") Open 0
+lbn r0 BUTTON HASH("IronIngotOrderButton") Setting 0
+breq r0 0 4
+move selectedIngot 2
+jal Oada
+sbn BUTTON HASH("IronIngotOrderButton") Open 0
+lbn r0 BUTTON HASH("CopperIngotOrderButton") Setting 0
+breq r0 0 4
+move selectedIngot 3
+jal Oada
+sbn BUTTON HASH("CopperIngotOrderButton") Open 0
+lbn r0 BUTTON HASH("SilverIngotOrderButton") Setting 0
+breq r0 0 4
+move selectedIngot 4
+jal Oada
+sbn BUTTON HASH("SilverIngotOrderButton") Open 0
+lbn r0 BUTTON HASH("GoldIngotOrderButton") Setting 0
+breq r0 0 4
+move selectedIngot 5
+jal Oada
+sbn BUTTON HASH("GoldIngotOrderButton") Open 0
+lbn r0 BUTTON HASH("LeadIngotOrderButton") Setting 0
+breq r0 0 4
+move selectedIngot 6
+jal Oada
+sbn BUTTON HASH("LeadIngotOrderButton") Open 0
+lbn r0 BUTTON HASH("NickelIngotOrderButton") Setting 0
+breq r0 0 4
+move selectedIngot 7
+jal Oada
+sbn BUTTON HASH("NickelIngotOrderButton") Open 0
+lbn r0 BUTTON HASH("SchtiuOrderButton") Setting 0
+breq r0 0 4
+move selectedIngot 8
+jal Oada
+sbn BUTTON HASH("SchtiuOrderButton") Open 0
+lbn r0 BUTTON HASH("ElectrumOrderButton") Setting 0
+breq r0 0 4
+move selectedIngot 9
+jal Oada
+sbn BUTTON HASH("ElectrumOrderButton") Open 0
+lbn r0 BUTTON HASH("InvarOrderButton") Setting 0
+breq r0 0 4
+move selectedIngot 10
+jal Oada
+sbn BUTTON HASH("InvarOrderButton") Open 0
+lbn r0 BUTTON HASH("ConstantanOrderButton") Setting 0
+breq r0 0 4
+move selectedIngot 11
+jal Oada
+sbn BUTTON HASH("ConstantanOrderButton") Open 0
+lbn r0 BUTTON HASH("SolderOrderButton") Setting 0
+breq r0 0 4
+move selectedIngot 12
+jal Oada
+sbn BUTTON HASH("SolderOrderButton") Open 0
+lbn r0 BUTTON HASH("AstroloyOrderButton") Setting 0
+breq r0 0 4
+move selectedIngot 13
+jal Oada
+sbn BUTTON HASH("AstroloyOrderButton") Open 0
+lbn r0 BUTTON HASH("HastelloyOrderButton") Setting 0
+breq r0 0 4
+move selectedIngot 14
+jal Oada
+sbn BUTTON HASH("HastelloyOrderButton") Open 0
+lbn r0 BUTTON HASH("InconelOrderButton") Setting 0
+breq r0 0 4
+move selectedIngot 15
+jal Oada
+sbn BUTTON HASH("InconelOrderButton") Open 0
+lbn r0 BUTTON HASH("WaspaloyOrderButton") Setting 0
+breq r0 0 4
+move selectedIngot 16
+jal Oada
+sbn BUTTON HASH("WaspaloyOrderButton") Open 0
+lbn r0 BUTTON HASH("StelliteOrderButton") Setting 0
+breq r0 0 4
+move selectedIngot 17
+jal Oada
+sbn BUTTON HASH("StelliteOrderButton") Open 0
+yield
+j Loop
+
+Oada:
+beq selectedIngot 0 ra
+s db Setting 1
+add r1 r1 0.01
+l r2 orderIc Setting
+brgt r2 0 -1
+s orderIc Setting r1
+yield
+l r2 orderIc Setting
+brgt r2 0 -1
+move r1 0
+s db Setting 0
+j ra
