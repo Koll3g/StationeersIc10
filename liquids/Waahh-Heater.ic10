@@ -1,0 +1,14 @@
+define Heat -287495560
+define Tank -1430440215
+
+Start:
+lbn r0 Tank HASH("Bo o Waahh") Temperature 1
+s db Setting r0
+brge r0 293.15 3
+sbn Heat HASH("Waahh-Heater1") On 1
+sbn Heat HASH("Waahh-Heater2") On 1
+brlt r0 293.15 3
+sbn Heat HASH("Waahh-Heater1") On 0
+sbn Heat HASH("Waahh-Heater2") On 0
+yield
+j Start
