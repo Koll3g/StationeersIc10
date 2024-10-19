@@ -29,9 +29,20 @@ lbn To -851746783 HASH("To") Setting Average
 lbn po -851746783 HASH("po") Setting Average
 l r1 furnace Pressure # if p > 55MPa -> reset hard
 bge r1 57000 Reset
+
+move Tc To
+
+l r0 furnace Temperature
+sub r0 To r0
+brgt r0 20 5
+mul r1 r0 r0
+mul r0 r1 r0
+mul r0 r0 0.02
+add Tc Tc r0
+
 l r13 PAWaste Temperature
-brap r13 To 0.05 14
-brlt r13 To 7 # check boundries -> w-c or h-w
+brap r13 Tc 0.05 14
+brlt r13 Tc 7 # check boundries -> w-c or h-w
 l p1 PAWaste Pressure
 l T1 PAWaste Temperature
 l p2 PACoolant Pressure
@@ -49,16 +60,6 @@ l T1 PAHeat Temperature
 l p2 PACoolant Pressure
 l T2 PACoolant Temperature
 move mode 3
-
-move Tc To
-
-l r0 furnace Temperature
-sub r0 To r0
-brgt r0 20 5
-mul r1 r0 r0
-mul r0 r1 r0
-mul r0 r0 0.02
-add Tc Tc r0
 
 # Calc V1/V2 (max 1)
 div r0 Tc T2
@@ -111,11 +112,16 @@ sbn -321403609 HASH("VPHeat") Setting 0
 sbn -321403609 HASH("VPWaste") Setting V1
 sbn -321403609 HASH("VPCoolant") Setting V2
 
-l r0 furnace Pressure
-sub r0 r0 po
-brle r0 0 5
+l r1 furnace Pressure
+sub r0 r1 po
+brle r0 0 10
 mul r0 r0 r0
-mul r0 r0 0.0006 # 0.0006x^2
+mul r0 r0 0.0005 # 0.0007x^2
+brle r1 10000 5
+div r2 r1 10000 # korrekt bei grossen drcken
+sqrt r2 r2
+div r2 1 r2
+mul r0 r0 r2
 s furnace SettingOutput r0
 j Loop
 s furnace SettingOutput 0

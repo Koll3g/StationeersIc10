@@ -1,20 +1,24 @@
 alias tankWaste d0
 alias activeVent d1
+alias tempDial d2
+alias tankAir d3
 
 define Mode1MaxPressure 300
 define Mode1NomPressure 250
 define Mode1MinPressure 200
-define Mode2MaxPressure 5000
-define Mode2NomPressure 4500
-define Mode2MinPressure 4000
+define Mode2MaxPressure 3000
+define Mode2NomPressure 2800
+define Mode2MinPressure 2600
 
 define ThresholdTemperature 180
-define MinWasteTemperature 210
+define MinWasteTemperature 220
 define MaxWasteTemperature 260
 
 alias wasteTemperature r0
 alias wastePressure r1
-alias wasteLiquid r2 
+alias wasteLiquid r2
+alias tempSetting r3
+alias airTemperature r4
 
 alias reachNominal r12
 alias currentMaxPressure r13
@@ -24,6 +28,17 @@ alias currentMinPressure r15
 move reachNominal 0
 
 Loop:
+l tempSetting tempDial Setting
+add tempSetting tempSetting 273
+sbn -2087593337 HASH("AirConBA") Setting tempSetting
+
+l airTemperature tankAir Temperature
+add tempSetting tempSetting 1
+brgt airTemperature tempSetting 3
+sbn -2087593337 HASH("AirConBA") Mode 0
+jr 2
+sbn -2087593337 HASH("AirConBA") Mode 1
+
 l wasteTemperature tankWaste Temperature
 brgt wasteTemperature ThresholdTemperature 5
 move currentMaxPressure Mode1MaxPressure
