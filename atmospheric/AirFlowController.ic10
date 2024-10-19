@@ -1,4 +1,10 @@
+define Sensor 322782515 #proxy Sensor
+define Licht 555215790 #Lichter
+
 alias patInputGas d0
+alias pDiffDisplay d1
+
+alias lightState r6
 
 alias lowerRoomPressure r7
 alias upperRoomPressure r8
@@ -13,7 +19,7 @@ alias roomTemperature r13
 alias numberOfOutVents r14
 alias numberOfInVents r15
 
-define RoomSize 9 # in nr. of Big-Grid-Cubes
+define RoomSize 140 # in nr. of Big-Grid-Cubes
 define AverageRoomPressure 100 # in kPa
 define MaxPressureDiff 30 # in kPa
 define RoomTemperatureUser 21 # in Celsius, used if not PAT is connected
@@ -22,6 +28,11 @@ sbn -1129453144 HASH("AirVentIn") On 0
 sbn -1129453144 HASH("AirVentOut") On 0
 
 Loop:
+lbn r0 Sensor HASH("Anwesenheit") Activate 1
+breq r0 lightState 3
+move lightState r0
+sbn Licht HASH("Wall Light (Long Wide)") On lightState
+
 sbn -1129453144 HASH("AirVentIn") Lock 1
 lbn numberOfInVents -1129453144 HASH("AirVentIn") Lock Sum
 sbn -1129453144 HASH("AirVentOut") Lock 1
@@ -30,25 +41,24 @@ lbn numberOfOutVents -1129453144 HASH("AirVentOut") Lock Sum
 lbn roomCo2Ratio -1252983604 HASH("AirSensor") RatioCarbonDioxide Average
 lbn roomTemperature -1252983604 HASH("AirSensor") Temperature Average
 
-brdns patInputGas 3 
+brdns patInputGas 3
 l inflowTemperature patInputGas Temperature
 jr 3
 move inflowTemperature RoomTemperatureUser
 add inflowTemperature inflowTemperature 273
 
-mul r0 roomCo2Ratio 1000
+mul r0 roomCo2Ratio 10000
 mul r1 r0 r0 # x^2
 mul r0 r1 r0 # x^3
-mul r0 r0 0.03 # 0.03x^3
-sqrt co2RatioMultiplier r0 # 0.03x^(3/2)
+mul r0 r0 0.05 # 0.05x^3
+sqrt co2RatioMultiplier r0 # 0.05x^(3/2)
 
 sub r0 roomTemperature inflowTemperature
 abs r0 r0 # absolute temp-diff
 mul r1 r0 r0 # x^2
 mul r0 r1 r0 # x^3
 mul r0 r0 0.75 # 0.75x^3
-sqrt temperatureMultiplier r0 # 0.75x^(3/2) 
-
+sqrt temperatureMultiplier r0 # 0.75x^(3/2)
 add r0 temperatureMultiplier co2RatioMultiplier
 
 mul r1 RoomSize 0.05
@@ -56,24 +66,35 @@ sqrt r1 r1 # sqrt(0.05x)
 
 mul r2 r0 r1 # temp, co2Ratio and roomsize
 
+s db Setting r2
+brdns pDiffDisplay 2
+s pDiffDisplay Setting r2
+
+div r2 r2 2 # div by two -> +-
+
 div r0 MaxPressureDiff 2
 # cap at max +-maxPressureDiff
 brle r2 r0 2
 move r2 r0
 
-sub lowerRoomPressure AverageRoomPressure r2
-div r0 r2 numberOfInVents
+div r0 1 numberOfInVents
 sqrt r1 numberOfInVents
 mul r0 r0 r1 # 1/x*sqrt(x)
-mul lowerRoomPressure lowerRoomPressure r0
+mul r3 r0 r2
+sub lowerRoomPressure AverageRoomPressure r3
 
-add upperRoomPressure AverageRoomPressure r2
-div r0 r2 numberOfOutVents
+div r0 1 numberOfOutVents
 sqrt r1 numberOfOutVents
 mul r0 r0 r1 # 1/x*sqrt(x)
-mul upperRoomPressure upperRoomPressure r0
+mul r3 r0 r2
+add upperRoomPressure AverageRoomPressure r3
 
 sbn -1129453144 HASH("AirVentIn") PressureExternal lowerRoomPressure
 sbn -1129453144 HASH("AirVentOut") PressureExternal upperRoomPressure
+sbn -1129453144 HASH("AirVentIn") On 1
+sbn -1129453144 HASH("AirVentOut") On 1
+
+yield
+sleep 1
 
 j Loop
