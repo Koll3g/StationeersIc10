@@ -37,7 +37,7 @@ jal action
 move r0 HASH("HV9.10")
 move r1 HASH("HD9.10")
 jal action
-yield
+sleep 10
 j select
 
 action:
@@ -67,6 +67,6 @@ sbn HV HVactive Harvest 1
 j ra
 
 seeding:
-lbns r2 HD HDactive 0 Seeding 0 #auslesen ob Seeding
-beq r2 1 harvest
+lbns r5 HD HDactive 0 Growth 0 #auslesen ob Seeding
+beq r5 6 harvest
 j ra
