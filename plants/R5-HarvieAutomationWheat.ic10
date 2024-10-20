@@ -1,0 +1,72 @@
+define HV 958056199 #Harvie
+define HD -1841632400 #Hydro Device
+define Lever 1220484876
+alias HVactive r0 #aktiver Harvie
+alias HDactive r1 #aktives Device
+
+s db Setting -1057658015
+
+select:
+move r0 HASH("HV5.1")
+move r1 HASH("HD5.1")
+jal action
+move r0 HASH("HV5.2")
+move r1 HASH("HD5.2")
+jal action
+move r0 HASH("HV5.3")
+move r1 HASH("HD5.3")
+jal action
+move r0 HASH("HV5.4")
+move r1 HASH("HD5.4")
+jal action
+move r0 HASH("HV5.5")
+move r1 HASH("HD5.5")
+jal action
+move r0 HASH("HV5.6")
+move r1 HASH("HD5.6")
+jal action
+move r0 HASH("HV5.7")
+move r1 HASH("HD5.7")
+jal action
+move r0 HASH("HV5.8")
+move r1 HASH("HD5.8")
+jal action
+move r0 HASH("HV5.9")
+move r1 HASH("HD5.9")
+jal action
+move r0 HASH("HV5.10")
+move r1 HASH("HD5.10")
+jal action
+yield
+j select
+
+action:
+lbn r2 HV HVactive On 0
+beq r2 0 ra # schritt skip wenn harvie aus
+lbns r2 HD HDactive 0 Occupied 0 #auslesen ob etwas gesetzt ist
+beq r2 0 plant #setzen wenn leer
+lbn r4 Lever HASH("Seeding5") Setting 0
+beq r4 1 seeding
+lbns r2 HD HDactive 0 Mature 0 #auslesen ob erntereif
+beq r2 1 harvest
+j ra
+
+plant:
+lbns r3 HV HVactive 0 Quantity 0
+beq r3 0 ra #schritt skip wenn kein seed vorhanden
+lbn r3 HD HDactive Pressure 0
+beq r3 0 ra #schritt skip wenn kein Druck
+lbn r3 HD HDactive Temperature 0
+blt r3 278 ra #schritt skip wenn zu kalt
+bgt r3 323 ra #schritt skip wenn zu warm
+sbn HV HVactive Plant 1
+j ra
+
+harvest:
+sbn HV HVactive Harvest 1
+j ra
+
+seeding:
+lbns r2 HD HDactive 0 Seeding 0 #auslesen ob Seeding
+beq r2 1 harvest
+j ra

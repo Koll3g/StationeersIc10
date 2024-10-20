@@ -17,6 +17,16 @@ jal batterie #abfrage Batteriedaten
 jal SLSAir #muss ganz unten in der Kette stehen !!!
 j main
 SLSAir:
+lbn r4 MEM HASH("SLS09") Setting 1
+breq r4 0 4
+div r5 r4 10
+add r6 r5 09 #hier SLS-Nummer eintragen (SLS11=11)
+j Alarm
+lbn r4 MEM HASH("SLS10") Setting 1
+breq r4 0 4
+div r5 r4 10
+add r6 r5 10 #hier SLS-Nummer eintragen (SLS11=11)
+j Alarm
 lbn r4 MEM HASH("SLS11") Setting 1
 breq r4 0 4
 div r5 r4 10
@@ -51,11 +61,6 @@ lbn r4 MEM HASH("SLS22") Setting 1
 breq r4 0 4
 div r5 r4 10
 add r6 r5 22 #hier SLS-Nummer eintragen (SLS11=11)
-j Alarm
-lbn r4 MEM HASH("SLS24") Setting 1
-breq r4 0 4
-div r5 r4 10
-add r6 r5 24 #hier SLS-Nummer eintragen (SLS11=11)
 j Alarm
 Alarm:
 beqal r4 2 Alarmair
