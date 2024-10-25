@@ -1,0 +1,66 @@
+define SORTER 873418029
+
+define sorterAmount 1196010
+define sorterManuel 1196063
+define sorter1 1195199
+define sorter21 1195163
+define sorter22 1195166
+define sorter31 1195139
+define sorter32 1195146
+define sorter33 1195143
+define sorter34 1195148
+define sorter10 1195433
+
+alias currentAmount r4
+alias currentCustomer r5
+alias sort r6
+alias noSort r7
+alias sorterAmountInstruction r8
+alias sorter1setting r9
+alias sorter21setting r10
+alias sorter22setting r11
+alias sorter31setting r12
+alias sorter32setting r13
+alias sorter33setting r14
+alias sorter34setting r15
+
+sll sort HASH("ItemPotato") 8
+or noSort sort 1
+or sort sort 2
+
+Loop:
+yield
+l r0 db Setting
+brle r0 0 -2
+trunc currentCustomer r0
+sub currentAmount r0 currentCustomer
+mul currentAmount currentAmount 100
+round currentAmount currentAmount
+
+sll r0 currentAmount 8
+or sorterAmountInstruction r0 6
+putd sorterAmount 0 sorterAmountInstruction
+putd sorterAmount 1 sort
+
+brne currentCustomer 1 2 # manuel
+putd sorterManuel 0 sort
+
+# brne currentCustomer 2 ? # rocket manufactory
+
+# brne currentCustomer 3 ? # autolathe 1
+
+# brne currentCustomer 4 ? # autolathe 2
+
+# brne currentCustomer 5 ? # toolmaker
+
+# brne currentCustomer 6 ? # security printer
+
+# brne currentCustomer 7 ? # electro printer 1
+
+# brne currentCustomer 8 ? # electro printer 2
+
+# brne currentCustomer 9 ? # pipe bender 1
+
+# brne currentCustomer 10 ? # pipe bender 2
+
+j Loop

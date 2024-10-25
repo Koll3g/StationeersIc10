@@ -1,0 +1,128 @@
+alias workStation d0 # Loop
+move r14 300 # AL1
+jal 16 # jal CheckWorkStation
+alias workStation d1
+move r14 500 # AL2
+jal 16 # jal CheckWorkStation
+alias workStation d2
+move r14 600 # EP1
+jal 16 # jal CheckWorkStation
+alias workStation d3
+move r14 800 # EP2
+jal 16 # jal CheckWorkStation
+alias workStation d4
+move r14 200 # RM
+jal 16 # jal CheckWorkStation
+j 0 # j Loop
+move r13 ra # CheckWorkStation
+lr r0 workStation Contents -1195893171 # Silicon
+move r15 1
+brge r0 200 2
+jal 98 # jal Order
+jal 112 # jal RemoveOrder
+lr r0 workStation Contents -666742878 # Iron
+move r15 2
+brge r0 200 3
+jal 98 # jal Order
+jal 112 # jal RemoveOrder
+lr r0 workStation Contents -1172078909 # Copper
+move r15 3
+brge r0 200 3
+jal 98 # jal Order
+jal 112 # jal RemoveOrder
+lr r0 workStation Contents 687283565 # Silver
+move r15 4
+brge r0 200 2
+jal 98 # jal Order
+jal 112 # jal RemoveOrder
+lr r0 workStation Contents -409226641 # Gold
+move r15 5
+brge r0 200 2
+jal 98 # jal Order
+jal 112 # jal RemoveOrder
+lr r0 workStation Contents -2002530571 # Lead
+move r15 6
+brge r0 200 2
+jal 98 # jal Order
+jal 112 # jal RemoveOrder
+lr r0 workStation Contents 1331613335 # Steel
+move r15 8
+brge r0 200 2
+jal 98 # jal Order
+jal 112 # jal RemoveOrder
+lr r0 workStation Contents 478264742 # Electrum
+move r15 9
+brge r0 100 2
+jal 98 # jal Order
+jal 112 # jal RemoveOrder
+lr r0 workStation Contents -626453759 # Invar
+move r15 10
+brge r0 100 2
+jal 98 # jal Order
+jal 112 # jal RemoveOrder
+lr r0 workStation Contents 1731241392 # Constantan
+move r15 11
+brge r0 100 2
+jal 98 # jal Order
+jal 112# jal RemoveOrder
+lr r0 workStation Contents -1206542381 # Solder
+move r15 12
+brge r0 100 2
+jal 98 # jal Order
+jal 112 # jal RemoveOrder
+lr r0 workStation Contents -1493155787 # Astroloy
+move r15 13
+brge r0 100 2
+jal 98# jal Order
+jal 112 # jal RemoveOrder
+lr r0 workStation Contents 2019732679 # Hastelloy
+move r15 14
+brge r0 100 2
+jal 98# jal Order
+jal 112 # jal RemoveOrder
+lr r0 workStation Contents -586072179 # Inconel
+move r15 15
+brge r0 100 2
+jal 98# jal Order
+jal 112 # jal RemoveOrder
+lr r0 workStation Contents 1787814293 # Waspaloy
+move r15 16
+brge r0 100 2
+jal 98# jal Order
+jal 112 # jal RemoveOrder
+lr r0 workStation Contents -500544800 # Stellite
+move r15 17
+brge r0 100 2
+jal 98# jal Order
+jal 112 # jal RemoveOrder
+j r13
+add ra ra 1 # Order
+add r1 r14 r15
+add r1 r1 0.01
+move r12 0
+get r0 db r12
+beq r0 r1 ra
+add r12 r12 1
+brlt r12 sp -3
+yield
+lbn r0 2096189278 HASH("IngotOrderIC") Setting Average
+brne r0 0 -2
+sbn 2096189278 HASH("IngotOrderIC") Setting r1
+push r1
+j ra
+add r1 r14 r15 # RemoveOrder
+add r1 r1 0.01
+move r12 0
+get r0 db r12
+brne r1 -1 4
+sub r11 r12 1
+put db r11 r0
+put db r12 0
+brne r0 r1 3
+put db r12 0
+move r1 -1
+add r12 r12 1
+brlt r12 sp -9
+bne r1 -1 ra
+sub sp sp 1
+j ra
