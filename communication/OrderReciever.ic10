@@ -1,0 +1,30 @@
+# Just write the order on this devies setting
+# keep in mind just to write to it if its 0
+# and it will be added to the queue of orders
+# the execution ic will then do the rest
+
+alias orderExecutorIc d0
+
+alias order r0
+alias executorOkupansi r1
+alias address r2
+
+s db Setting 0
+put db 0 0
+
+Loop:
+l order db Setting
+bgtal order 0 PlaceOrder
+yield
+j Loop
+
+PlaceOrder:
+yield
+l executorOkupansi orderExecutorIc Setting
+brgt executorOkupansi 0 -2
+get address db 0
+put orderExecutorIc address order
+add address address 1
+put db 0 address
+s db Setting 0
+j ra

@@ -16,13 +16,6 @@ alias currentCustomer r5
 alias sort r6
 alias noSort r7
 alias sorterAmountInstruction r8
-alias sorter1setting r9
-alias sorter21setting r10
-alias sorter22setting r11
-alias sorter31setting r12
-alias sorter32setting r13
-alias sorter33setting r14
-alias sorter34setting r15
 
 sll sort HASH("ItemPotato") 8
 or noSort sort 1
@@ -42,25 +35,54 @@ or sorterAmountInstruction r0 6
 putd sorterAmount 0 sorterAmountInstruction
 putd sorterAmount 1 sort
 
-brne currentCustomer 1 2 # manuel
+brne currentCustomer 1 3 # manuel
 putd sorterManuel 0 sort
+jr 2
+putd sorterManuel 0 noSort
 
-# brne currentCustomer 2 ? # rocket manufactory
+brne currentCustomer 10 3 # pipe bender 2
+putd sorter10 0 sort
+jr 2
+putd sorter10 0 noSort
 
-# brne currentCustomer 3 ? # autolathe 1
+brne currentCustomer 2 4 # rocket manufactory
+putd sorter1 0 noSort
+putd sorter21 0 noSort
+putd sorter31 0 noSort
+brne currentCustomer 3 4 # autolathe 1
+putd sorter1 0 sort
+putd sorter22 0 noSort
+putd sorter33 0 noSort
+brne currentCustomer 4 4 # autolathe 2
+putd sorter1 0 noSort
+putd sorter21 0 noSort
+putd sorter31 0 sort
+brne currentCustomer 5 4 # toolmaker
+putd sorter1 0 sort
+putd sorter22 0 noSort
+putd sorter33 0 sort
+brne currentCustomer 6 4 # pipe bender 2
+putd sorter1 0 noSort
+putd sorter21 0 sort
+putd sorter32 0 noSort
+brne currentCustomer 7 4 # pipe bender 1
+putd sorter1 0 sort
+putd sorter22 0 sort
+putd sorter34 0 noSort
+brne currentCustomer 8 4 # electro printer 2
+putd sorter1 0 noSort
+putd sorter21 0 sort
+putd sorter32 0 sort
+brne currentCustomer 9 4 # electro printer 1
+putd sorter1 0 sort
+putd sorter22 0 sort
+putd sorter34 0 sort
 
-# brne currentCustomer 4 ? # autolathe 2
-
-# brne currentCustomer 5 ? # toolmaker
-
-# brne currentCustomer 6 ? # security printer
-
-# brne currentCustomer 7 ? # electro printer 1
-
-# brne currentCustomer 8 ? # electro printer 2
-
-# brne currentCustomer 9 ? # pipe bender 1
-
-# brne currentCustomer 10 ? # pipe bender 2
-
+yield
+s db Setting -1
+getd r0 sorterAmount 0
+srl r0 r0 8
+brgt r0 0 -4
+sleep 8
+s db Setting 0
 j Loop

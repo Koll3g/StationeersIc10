@@ -1,0 +1,94 @@
+alias dialIngot d0
+alias dialAmount d1
+alias displayIngot d2
+alias displayAmount d3
+alias orderButton d4
+alias oreFiller d5
+
+define stateMemory 661043
+
+Loop:
+l r0 dialIngot Setting
+brne r0 0 2 # OFF!!
+s displayIngot Setting 0
+brne r0 1 3 # silikoune
+s displayIngot Setting HASH("ItemSiliconIngot")
+s dialAmount Mode 10
+brne r0 2 3 # airoune
+s displayIngot Setting HASH("ItemIronIngot")
+s dialAmount Mode 10
+brne r0 3 3 # koppa
+s displayIngot Setting HASH("ItemCopperIngot")
+s dialAmount Mode 10
+brne r0 4 3 # silvo
+s displayIngot Setting HASH("ItemSilverIngot")
+s dialAmount Mode 10
+brne r0 5 3 # goulde
+s displayIngot Setting HASH("ItemGoldIngot")
+s dialAmount Mode 10
+brne r0 6 3 # liiid
+s displayIngot Setting HASH("ItemLeadIngot")
+s dialAmount Mode 10
+brne r0 7 3 # nickl
+s displayIngot Setting HASH("ItemNickelIngot")
+s dialAmount Mode 10
+brne r0 8 3 # schtiu
+s displayIngot Setting HASH("ItemSteelIngot")
+s dialAmount Mode 5
+brne r0 9 3 # lktrm und dner man
+s displayIngot Setting HASH("ItemElectrumIngot")
+s dialAmount Mode 10
+brne r0 10 3 # invare
+s displayIngot Setting HASH("ItemInvarIngot")
+s dialAmount Mode 10
+brne r0 11 3 # konstantane
+s displayIngot Setting HASH("ItemConstantanIngot")
+s dialAmount Mode 10
+brne r0 12 3 # soldere
+s displayIngot Setting HASH("ItemSolderIngot")
+s dialAmount Mode 10
+brne r0 13 3 # ashitroloi
+s displayIngot Setting HASH("ItemAstroloyIngot")
+s dialAmount Mode 6
+brne r0 14 3 # hashtelloi
+s displayIngot Setting HASH("ItemHastelloyIngot")
+s dialAmount Mode 6
+brne r0 15 3 # incel
+s displayIngot Setting HASH("ItemInconelIngot")
+s dialAmount Mode 6
+brne r0 16 3 # washpaloi
+s displayIngot Setting HASH("ItemWaspaloyIngot")
+s dialAmount Mode 6
+brne r0 17 3 # shitelite
+s displayIngot Setting HASH("ItemStelliteIngot")
+s dialAmount Mode 6
+
+l r2 dialAmount Setting
+l r1 dialAmount Mode
+brle r2 r1 2
+s dialAmount Setting r1
+
+l r2 dialAmount Setting
+brne r0 8 2
+mul r2 r2 2
+s displayAmount Setting r2
+
+yield
+# return if no oada
+l r0 orderButton Setting
+beq r0 0 Loop
+# return if already smelting
+ld r0 stateMemory Setting
+bgt r0 0 Loop
+# return if already filling
+l r0 oreFiller Setting
+bne r0 0 Loop
+
+l r0 dialIngot Setting
+l r1 dialAmount Setting
+div r1 r1 100
+add r0 r0 r1
+s oreFiller Setting r0
+s db Setting r0
+
+j Loop

@@ -14,7 +14,6 @@ alias To r14
 alias Tc r15
 
 alias mode r11
-
 Reset:
 s furnace SettingOutput 100 # reset hard
 sbn -321403609 HASH("VPHeat") Setting 0 # reset
@@ -29,17 +28,20 @@ lbn To -851746783 HASH("To") Setting Average
 lbn po -851746783 HASH("po") Setting Average
 l r1 furnace Pressure # if p > 55MPa -> reset hard
 bge r1 57000 Reset
-
 move Tc To
-
 l r0 furnace Temperature
 sub r0 To r0
-brgt r0 20 5
 mul r1 r0 r0
 mul r0 r1 r0
 mul r0 r0 0.02
+brlt r0 0 4
+brlt r0 150 2
+move r0 150
+jr 3
+brgt r0 -150 2
+move r0 -150
 add Tc Tc r0
-
+s db Setting Tc
 l r13 PAWaste Temperature
 brap r13 Tc 0.05 14
 brlt r13 Tc 7 # check boundries -> w-c or h-w
@@ -60,7 +62,6 @@ l T1 PAHeat Temperature
 l p2 PACoolant Pressure
 l T2 PACoolant Temperature
 move mode 3
-
 # Calc V1/V2 (max 1)
 div r0 Tc T2
 sub r0 r0 1
@@ -76,7 +77,6 @@ div V2 1 V1
 move V1 1
 jr 2
 move V2 1
-
 # Calc V-Multiplier
 l r1 furnace Temperature
 sub r0 r1 To
@@ -116,10 +116,10 @@ l r1 furnace Pressure
 sub r0 r1 po
 brle r0 0 10
 mul r0 r0 r0
-mul r0 r0 0.0005 # 0.0007x^2
+mul r0 r0 0.0005 # 0.0005x^2
 brle r1 10000 5
 div r2 r1 10000 # korrekt bei grossen drcken
-sqrt r2 r2
+# sqrt r2 r2
 div r2 1 r2
 mul r0 r0 r2
 s furnace SettingOutput r0

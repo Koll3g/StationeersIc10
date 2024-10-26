@@ -1,0 +1,49 @@
+define SILO 1155865682
+
+alias orderRevieverIc d0
+# the distributor is optional but can be helpful
+alias orderDistributorIc d1
+
+alias currentOrder r15
+
+# reset all the order and the adress of the orderReciever
+s db Setting 2
+move currentOrder -1
+add currentOrder currentOrder 1
+put db currentOrder 0
+brlt currentOrder 511 -2
+put orderRevieverIc 0 0
+s db Setting 0
+
+Loop:
+get currentOrder db 0
+bgtal currentOrder 0 ExecuteOrder
+bgtal currentOrder 0 RearrangeOrders
+j Loop
+
+ExecuteOrder:
+
+# execute the order
+# do not reset
+
+j ra
+
+# Because it is a stack we need to do some
+# work to transform it into a queue
+RearrangeOrders:
+s db Setting 1
+yield
+move r9 1
+get r5 orderRevieverIc 0
+RearrangeLoop:
+get currentOrder db r9
+sub r9 r9 1
+put db r9 currentOrder
+add r9 r9 2
+blt r9 r5 RearrangeLoop
+sub r5 r5 1
+put db r5 0
+put orderRevieverIc 0 r5
+yield
+s db Setting 0
+j ra
