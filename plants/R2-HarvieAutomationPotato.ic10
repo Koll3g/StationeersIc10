@@ -1,6 +1,8 @@
 define HV 958056199 #Harvie
 define HD -1841632400 #Hydro Device
 define Lever 1220484876
+define VENDER -1577831321 # Vending Machine
+define vendingMachine HASH("Vending Machine Potat")
 alias HVactive r0 #aktiver Harvie
 alias HDactive r1 #aktives Device
 
@@ -52,6 +54,8 @@ beq r2 1 harvest
 j ra
 
 plant:
+lbn r3 VENDER vendingMachine Quantity Average
+bgt r3 90 ra # schritt skip wenn vending machine voll
 lbns r3 HV HVactive 0 Quantity 0
 beq r3 0 ra #schritt skip wenn kein seed vorhanden
 lbn r3 HD HDactive Pressure 0

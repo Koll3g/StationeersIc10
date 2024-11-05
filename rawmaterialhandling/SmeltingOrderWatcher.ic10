@@ -1,0 +1,105 @@
+alias orderDistributionIc d0
+alias orderExecutorIc d1
+alias orderRecieverIc d2
+
+alias currentRecipe r6
+alias currentAmount r7
+alias reagentAmount r8
+alias currentAdress r9
+alias futureOrder r10
+
+sbn -815193061 HASH("CurrentOrderProgessDisplay") Mode 1
+move currentAdress 0
+
+Reset:
+s db Setting 0
+sbn -815193061 HASH("CurrentOrderAmountDisplay") Setting 0
+sbn -815193061 HASH("CurrentOrderProgessDisplay") Setting 0
+Loop:
+yield
+get r15 orderRecieverIc 0
+sbn -815193061 HASH("SmeltingOrderQueueAmountDisplay") Setting r15
+get futureOrder orderExecutorIc currentAdress
+breq futureOrder 0 4
+trunc currentRecipe futureOrder
+jal SetHash
+sbn -851746783 HASH("SmeltingOrderQueueMemory") Setting r14
+add currentAdress currentAdress 1
+brlt currentAdress r15 2
+move currentAdress 0
+
+l r0 orderDistributionIc Setting
+beq r0 0 Reset # OFF!!
+trunc currentRecipe r0
+sub currentAmount r0 currentRecipe
+mul currentAmount currentAmount 100
+round currentAmount currentAmount
+
+jal SetHash
+s db Setting r14
+
+move r5 currentAmount
+brne currentRecipe 8 3
+mul r5 r5 2
+mul reagentAmount reagentAmount 2
+
+lbn r4 2096189278 HASH("FurnaceMirror") Reagents Average
+div r3 r4 reagentAmount
+sbn -815193061 HASH("CurrentOrderProgessDisplay") Setting r3
+
+sbn -815193061 HASH("CurrentOrderAmountDisplay") Setting r5
+j Loop
+
+SetHash:
+brne currentRecipe 1 3 # silikoune
+move r14 HASH("ItemSiliconIngot")
+mul reagentAmount currentAmount 500
+brne currentRecipe 2 3 # airoune
+move r14 HASH("ItemIronIngot")
+mul reagentAmount currentAmount 500
+brne currentRecipe 3 3 # koppa
+move r14 HASH("ItemCopperIngot")
+mul reagentAmount currentAmount 500
+brne currentRecipe 4 3 # silvo
+move r14 HASH("ItemSilverIngot")
+mul reagentAmount currentAmount 500
+brne currentRecipe 5 3 # goulde
+move r14 HASH("ItemGoldIngot")
+mul reagentAmount currentAmount 500
+brne currentRecipe 6 3 # liiid
+move r14 HASH("ItemLeadIngot")
+mul reagentAmount currentAmount 500
+brne currentRecipe 7 3 # nickl
+move r14 HASH("ItemNickelIngot")
+mul reagentAmount currentAmount 500
+brne currentRecipe 8 3 # schtiu
+move r14 HASH("ItemSteelIngot")
+mul reagentAmount currentAmount 500
+brne currentRecipe 9 3 # lktrm und dner man
+move r14 HASH("ItemElectrumIngot")
+mul reagentAmount currentAmount 500
+brne currentRecipe 10 3 # invare
+move r14 HASH("ItemInvarIngot")
+mul reagentAmount currentAmount 500
+brne currentRecipe 11 3 # konstantane
+move r14 HASH("ItemConstantanIngot")
+mul reagentAmount currentAmount 500
+brne currentRecipe 12 3 # soldere
+move r14 HASH("ItemSolderIngot")
+mul reagentAmount currentAmount 500
+brne currentRecipe 13 3 # ashitroloi
+move r14 HASH("ItemAstroloyIngot")
+mul reagentAmount currentAmount 800
+brne currentRecipe 14 3 # hashtelloi
+move r14 HASH("ItemHastelloyIngot")
+mul reagentAmount currentAmount 800
+brne currentRecipe 15 3 # incel
+move r14 HASH("ItemInconelIngot")
+mul reagentAmount currentAmount 800
+brne currentRecipe 16 3 # washpaloi
+move r14 HASH("ItemWaspaloyIngot")
+mul reagentAmount currentAmount 800
+brne currentRecipe 17 3 # shitelite
+move r14 HASH("ItemStelliteIngot")
+mul reagentAmount currentAmount 800
+j ra

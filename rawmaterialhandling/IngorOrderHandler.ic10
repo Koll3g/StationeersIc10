@@ -1,4 +1,5 @@
 alias orderExecutorIc d0
+alias orderDistributor d1
 
 alias order r0
 alias executorOkupansi r1
@@ -10,6 +11,9 @@ put db 0 0
 Loop:
 l order db Setting
 bgtal order 0 PlaceOrder
+bgtal address 0 TurnOnOthers
+beqal address 0 TurnOffOthers
+s d2 Setting address
 yield
 j Loop
 
@@ -22,4 +26,14 @@ put orderExecutorIc address order
 add address address 1
 put db 0 address
 s db Setting 0
+j ra
+
+TurnOnOthers:
+s orderExecutorIc On 1
+s orderDistributor On 1
+j ra
+
+TurnOffOthers:
+s orderExecutorIc On 0
+s orderDistributor On 0
 j ra
