@@ -7,35 +7,35 @@ alias HDactive r1 #aktives Device
 s db Setting 2044798572
 
 select:
-move r0 HASH("HV10.1")
-move r1 HASH("HD10.1")
+move r0 HASH("HV11.1")
+move r1 HASH("HD11.1")
 jal action
-move r0 HASH("HV10.2")
-move r1 HASH("HD10.2")
+move r0 HASH("HV11.2")
+move r1 HASH("HD11.2")
 jal action
-move r0 HASH("HV10.3")
-move r1 HASH("HD10.3")
+move r0 HASH("HV11.3")
+move r1 HASH("HD11.3")
 jal action
-move r0 HASH("HV10.4")
-move r1 HASH("HD10.4")
+move r0 HASH("HV11.4")
+move r1 HASH("HD11.4")
 jal action
-move r0 HASH("HV10.5")
-move r1 HASH("HD10.5")
+move r0 HASH("HV11.5")
+move r1 HASH("HD11.5")
 jal action
-move r0 HASH("HV10.6")
-move r1 HASH("HD10.6")
+move r0 HASH("HV11.6")
+move r1 HASH("HD11.6")
 jal action
-move r0 HASH("HV10.7")
-move r1 HASH("HD10.7")
+move r0 HASH("HV11.7")
+move r1 HASH("HD11.7")
 jal action
-move r0 HASH("HV10.8")
-move r1 HASH("HD10.8")
+move r0 HASH("HV11.8")
+move r1 HASH("HD11.8")
 jal action
-move r0 HASH("HV10.9")
-move r1 HASH("HD10.9")
+move r0 HASH("HV11.9")
+move r1 HASH("HD11.9")
 jal action
-move r0 HASH("HV10.10")
-move r1 HASH("HD10.10")
+move r0 HASH("HV11.10")
+move r1 HASH("HD11.10")
 jal action
 sleep 10
 j select
@@ -45,7 +45,7 @@ lbn r2 HV HVactive On 0
 beq r2 0 ra # schritt skip wenn harvie aus
 lbns r2 HD HDactive 0 Occupied 0 #auslesen ob etwas gesetzt ist
 beq r2 0 plant #setzen wenn leer
-lbn r4 Lever HASH("Seeding10") Setting 0
+lbn r4 Lever HASH("Seeding11") Setting 0
 beq r4 1 seeding
 lbns r2 HD HDactive 0 Mature 0 #auslesen ob erntereif
 beq r2 1 harvest

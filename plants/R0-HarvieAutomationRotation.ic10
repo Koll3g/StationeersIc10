@@ -1,0 +1,41 @@
+define icTomato 123
+define icPotato 123
+define icCorn 123
+define icSoyBean 123
+define icWheat 123
+define icRice 123
+define icPumpkin 123
+define icCocoa 123
+define icSugarCane 123
+
+alias currentIc r15
+
+Loop:
+move currentIc icTomato
+jal DoTheThing
+move currentIc icPotato
+jal DoTheThing
+move currentIc icCorn
+jal DoTheThing
+move currentIc icSoyBean
+jal DoTheThing
+move currentIc icWheat
+jal DoTheThing
+move currentIc icRice
+jal DoTheThing
+move currentIc icPumpkin
+jal DoTheThing
+move currentIc icCocoa
+jal DoTheThing
+move currentIc icSugarCane
+jal DoTheThing
+j Loop
+
+DoTheThing:
+sd currentIc On 1
+putd currentIc 0 1
+yield
+getd r0 currentIc 0
+brne r0 0 -2
+sd currentIc On 0
+j ra

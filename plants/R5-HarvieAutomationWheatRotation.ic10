@@ -1,0 +1,85 @@
+define HARVIE 958056199 #Harvie
+define HYDROPHONICS -1841632400 #Hydro Device
+define LEVER 1220484876
+define VENDER -1577831321 # Vending Machine
+
+define leverName HASH("Seeding5")
+define vendingMachine HASH("Vending Machine Wheat")
+s db Setting -1057658015 # wheat
+
+alias activeHV r13 #aktiver Harvie
+alias activeHD r14 #aktives Device
+alias numberOfLoops r15
+
+put db 0 0
+
+select:
+yield
+get numberOfLoops db 0
+ble numberOfLoops 0 select
+move activeHV HASH("HV5.1")
+move activeHD HASH("HD5.1")
+jal action
+move activeHV HASH("HV5.2")
+move activeHD HASH("HD5.2")
+jal action
+move activeHV HASH("HV5.3")
+move activeHD HASH("HD5.3")
+jal action
+move activeHV HASH("HV5.4")
+move activeHD HASH("HD5.4")
+jal action
+move activeHV HASH("HV5.5")
+move activeHD HASH("HD5.5")
+jal action
+move activeHV HASH("HV5.6")
+move activeHD HASH("HD5.6")
+jal action
+move activeHV HASH("HV5.7")
+move activeHD HASH("HD5.7")
+jal action
+move activeHV HASH("HV5.8")
+move activeHD HASH("HD5.8")
+jal action
+move activeHV HASH("HV5.9")
+move activeHD HASH("HD5.9")
+jal action
+move activeHV HASH("HV5.10")
+move activeHD HASH("HD5.10")
+jal action
+sub numberOfLoops numberOfLoops 1
+put db 0 numberOfLoops
+j select
+
+action:
+lbn r0 HARVIE activeHV On 0
+beq r0 0 ra # schritt skip wenn harvie aus
+lbns r0 HYDROPHONICS activeHD 0 Occupied 0 #auslesen ob etwas gesetzt ist
+beq r0 0 plant #setzen wenn leer
+lbn r0 LEVER leverName Setting 0
+beq r0 1 seeding
+lbns r0 HYDROPHONICS activeHD 0 Mature 0 #auslesen ob erntereif
+beq r0 1 harvest
+j ra
+
+plant:
+lbns r0 HARVIE activeHV 0 Quantity 0
+beq r0 0 ra #schritt skip wenn kein seed vorhanden
+lbn r0 VENDER vendingMachine Quantity Average
+bgt r0 90 ra # schritt skip wenn vending machine voll
+lbn r0 HYDROPHONICS activeHD Pressure 0
+beq r0 0 ra #schritt skip wenn kein Druck
+lbn r0 HYDROPHONICS activeHD Temperature 0
+blt r0 278 ra #schritt skip wenn zu kalt
+bgt r0 323 ra #schritt skip wenn zu warm
+sbn HARVIE activeHV Plant 1
+j ra
+
+harvest:
+sbn HARVIE activeHV Harvest 1
+j ra
+
+seeding:
+lbns r0 HYDROPHONICS activeHD 0 Growth 0 #auslesen ob Seeding
+beq r0 6 harvest
+j ra
