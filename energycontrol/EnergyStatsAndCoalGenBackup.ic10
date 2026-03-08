@@ -1,0 +1,122 @@
+define AnalyzerInput HASH("Cable Analyzer Input")
+define AnalyzerOutput HASH("Cable Analyzer Output")
+define Battery -400115994
+define BatChargePcntDisplay HASH("Battery Charge Percent")
+define BatChargeWattDisplay HASH("Battery Charge Watt")
+define TimeUntilEmptyDisplay HASH("Time Until Empty")
+define ChargeCurrentDisplay HASH("Charging Current")
+define TimeUntilChargedDisplay HASH("Time Until Fully Charged")
+define PowerConsumptionDisplay HASH("Total Power Consumption")
+define PublishCount 5
+define EnergyStatDisplay HASH("Energy Stats")
+alias avgBatteryChargePercent r15
+alias sumBatteryChargeWatt r14
+alias sumBatteryCapacity r13
+alias missingBatteryWattage r7
+alias inputWattage r12
+alias outputWattage r11
+alias chargeWattage r10
+alias timeUntilBatteryEmptyDays r9
+alias timeUntilBatteryFull r8
+alias count r5
+move count 0
+alias publishState r6
+move publishState 0
+Main:
+lb avgBatteryChargePercent Battery Ratio Average
+lb sumBatteryChargeWatt Battery Charge Sum
+lbn outputWattage 1036015121 AnalyzerOutput PowerActual Average
+div r0 sumBatteryChargeWatt outputWattage
+div r0 r0 1200
+jal RoundR0To1DecimalPoint
+move timeUntilBatteryEmptyDays r0
+lbn inputWattage 1036015121 AnalyzerInput PowerActual Average
+sub chargeWattage inputWattage outputWattage
+lb sumBatteryCapacity Battery Maximum Sum
+sub missingBatteryWattage sumBatteryCapacity sumBatteryChargeWatt
+div r0 missingBatteryWattage chargeWattage
+div r0 r0 60
+jal RoundR0To1DecimalPoint
+move timeUntilBatteryFull r0
+jal WriteToDisplays
+jal GeneratorControl
+yield
+j Main
+WriteToDisplays:
+sbn -815193061 BatChargePcntDisplay Mode 1
+sbn -815193061 BatChargePcntDisplay Setting avgBatteryChargePercent
+sbn -815193061 BatChargeWattDisplay Mode 2
+sbn -815193061 BatChargeWattDisplay Setting sumBatteryChargeWatt
+sbn -815193061 TimeUntilEmptyDisplay Mode 9
+sbn -815193061 TimeUntilEmptyDisplay Setting timeUntilBatteryEmptyDays
+sbn -815193061 ChargeCurrentDisplay Mode 2
+sbn -815193061 ChargeCurrentDisplay Setting chargeWattage
+sbn -815193061 PowerConsumptionDisplay Mode 2
+sbn -815193061 PowerConsumptionDisplay Setting outputWattage
+brlt timeUntilBatteryFull 0 4
+sbn -815193061 TimeUntilChargedDisplay Mode 8
+sbn -815193061 TimeUntilChargedDisplay Setting timeUntilBatteryFull
+jr 3
+sbn -815193061 TimeUntilChargedDisplay Mode 10
+sbn -815193061 TimeUntilChargedDisplay Setting 5123393
+add count count 1
+bge count PublishCount PublishEnergyStats
+j ra
+RoundR0To1DecimalPoint:
+mul r0 r0 10
+round r0 r0
+div r0 r0 10
+j ra
+PublishEnergyStats:
+sbn 2096189278 EnergyStatDisplay Color 7
+sleep 0.01
+move count 0
+beq publishState 0 PublishPercentage
+beq publishState 1 PublishTimeUntilEmpty
+beq publishState 2 PublishPowerDiff
+j ra
+PublishPercentage:
+sbn 2096189278 EnergyStatDisplay Mode 1
+sbn 2096189278 EnergyStatDisplay Setting avgBatteryChargePercent
+move publishState 1
+bge avgBatteryChargePercent 0.5 SetDisplayGreen
+blt avgBatteryChargePercent 0.5 SetDisplayOrange
+blt avgBatteryChargePercent 0.2 SetDisplayRed
+j ra
+PublishTimeUntilEmpty:
+sbn 2096189278 EnergyStatDisplay Mode 9
+sbn 2096189278 EnergyStatDisplay Setting timeUntilBatteryEmptyDays
+move publishState 2
+bge timeUntilBatteryEmptyDays 1 SetDisplayGreen
+blt timeUntilBatteryEmptyDays 1 SetDisplayOrange
+blt timeUntilBatteryEmptyDays 0.5 SetDisplayRed
+j ra
+PublishPowerDiff:
+sbn 2096189278 EnergyStatDisplay Mode 2
+sbn 2096189278 EnergyStatDisplay Setting chargeWattage
+move publishState 0
+bge chargeWattage -0.3 SetDisplayGreen
+blt chargeWattage -0.3 SetDisplayBlue
+j ra
+GeneratorControl:
+blt avgBatteryChargePercent 0.1 TurnGeneratorOn
+bgt avgBatteryChargePercent 0.3 TurnGeneratorOff
+j ra
+TurnGeneratorOn:
+sb 813146305 On 1
+j ra
+TurnGeneratorOff:
+sb 813146305 On 0
+j ra
+SetDisplayGreen:
+sbn 2096189278 EnergyStatDisplay Color 2
+j ra
+SetDisplayOrange:
+sbn 2096189278 EnergyStatDisplay Color 3
+j ra
+SetDisplayRed:
+sbn 2096189278 EnergyStatDisplay Color 4
+j ra
+SetDisplayBlue:
+sbn 2096189278 EnergyStatDisplay Color 0
+j ra
