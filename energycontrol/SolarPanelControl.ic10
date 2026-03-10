@@ -1,0 +1,11 @@
+define solarPanel -1545574413
+
+alias daylightSensor d0
+
+Loop:
+l r0 daylightSensor Horizontal
+l r1 daylightSensor Vertical
+
+sb solarPanel Horizontal r0
+sb solarPanel Vertical r1
+j Loop

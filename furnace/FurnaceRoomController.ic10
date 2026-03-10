@@ -1,8 +1,8 @@
-# d0 = PAHeat
-# d1 = PACoolant
-# d2 = PAWaste
-# d3 = furnace
-
+alias PAHeat d0
+alias PACoolant d1
+alias PAWaste d2
+alias GasSensor d3
+alias ActiveVent d4
 alias p1 r4
 alias V1 r5
 alias T1 r6
@@ -11,44 +11,46 @@ alias p2 r8
 alias V2 r9
 alias T2 r10
 alias C2 r11
-alias po r12
 alias To r14
 alias Co r15
-s d3 SettingOutput 100 # reset hard
-sbn -321403609 HASH("VPHeat") Setting 0 # reset
-sbn -321403609 HASH("VPWaste") Setting 0
-sbn -321403609 HASH("VPCoolant") Setting 0
+s ActiveVent Lock 1
+s ActiveVent Mode 1
+s ActiveVent On 1 # reset hard
+sbn -321403609 HASH("VPHeatRoom") Setting 0 # reset
+sbn -321403609 HASH("VPWasteRoom") Setting 0
+sbn -321403609 HASH("VPCoolantRoom") Setting 0
 loop:
 lbn r0 -851746783 HASH("SelectionHash") Setting Average
 breq r0 0 -6
 lbn To -851746783 HASH("To") Setting Average
-lbn po -851746783 HASH("po") Setting Average
-l r1 d3 Pressure # if p > 55MPa -> reset hard
-brge r1 55000 -10
-l r0 d3 Temperature
+l r1 GasSensor Pressure # if p > 150kPa -> reset hard
+brge r1 150 -9
+l r0 GasSensor Temperature
 sap r0 r0 To 0.01
-sap r1 r1 po 0.005 # coz for inconel 1% is critical
+sap r1 r1 100 0.01
 and r0 r0 r1
-breq r0 1 -14 # if approx des. values -> reset
-l r13 d2 Temperature
-alias paC d2 # d2 = PaWaste
+brne r0 0 3 # if approx des. values -> reset
+s ActiveVent On 0 # reset hard
+jr -15
+l r13 PAWaste Temperature
+alias paC PAWaste
 jal CalcC
 brlt r13 To 10 # check boundries -> w-c or h-w
-l p1 d2 Pressure
-l T1 d2 Temperature
+l p1 PAWaste Pressure
+l T1 PAWaste Temperature
 move C1 r1
-l p2 d1 Pressure # d1 = PACoolant
-l T2 d1 Temperature
-alias paC d1
+l p2 PACoolant Pressure
+l T2 PACoolant Temperature
+alias paC PACoolant
 jal CalcC
 move C2 r1
 jr 9
-l p2 d2 Pressure
-l T2 d2 Temperature
+l p2 PAWaste Pressure
+l T2 PAWaste Temperature
 move C2 r1
-l p1 d0 Pressure # d0 = PAHeat
-l T1 d0 Temperature
-alias paC d0
+l p1 PAHeat Pressure
+l T1 PAHeat Temperature
+alias paC PAHeat
 jal CalcC
 move C1 r1
 add r0 C1 C2 # C1 + C2
@@ -78,8 +80,7 @@ div V2 1 V1
 move V1 1
 jr 2
 move V2 1
-s db Setting V2
-l r1 d3 Temperature
+l r1 GasSensor Temperature
 sub r0 r1 To
 abs r0 r0
 div r0 r0 500 # V-multiplier 1 at 500K diff
@@ -90,20 +91,13 @@ mul r0 r0 10 # limit at 10l
 mul V1 r0 V1
 mul V2 r0 V2
 brlt r13 To 5
-sbn -321403609 HASH("VPHeat") Setting 0
-sbn -321403609 HASH("VPWaste") Setting V1
-sbn -321403609 HASH("VPCoolant") Setting V2
+sbn -321403609 HASH("VPHeatRoom") Setting 0
+sbn -321403609 HASH("VPWasteRoom") Setting V1
+sbn -321403609 HASH("VPCoolantRoom") Setting V2
 jr 4
-sbn -321403609 HASH("VPHeat") Setting V1
-sbn -321403609 HASH("VPWaste") Setting V2
-sbn -321403609 HASH("VPCoolant") Setting 0
-l r0 d3 Pressure
-sub r0 r0 po
-brle r0 0 4
-div r0 r0 100 # 10Mpa (10000) / 200 = 50l
-s d3 SettingOutput r0
-jr 2
-s d3 SettingOutput 0
+sbn -321403609 HASH("VPHeatRoom") Setting V1
+sbn -321403609 HASH("VPWasteRoom") Setting V2
+sbn -321403609 HASH("VPCoolantRoom") Setting 0
 j loop
 CalcC:
 move r1 0

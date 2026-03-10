@@ -1,12 +1,12 @@
-define ironSilo 154552
-define copperSilo 154575
-define coalSilo 154556
-define siliconSilo 154578
-define silverSilo 154779
-define goldSilo 154595
-define nickelSilo 154791
-define leadSilo 154764
-define cobaltSilo 154748
+define ironSilo 120120
+define copperSilo 120123
+define coalSilo 120144
+define siliconSilo 120117
+define silverSilo 120126
+define goldSilo 120154
+define nickelSilo 120160
+define leadSilo 120157
+define cobaltSilo 120163
 
 define stateMemory 661043
 

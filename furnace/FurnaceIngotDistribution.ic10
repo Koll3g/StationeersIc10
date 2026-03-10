@@ -1,10 +1,10 @@
 alias stateMemory d0
 alias furnace d1
-alias sorterLager d2
-alias sorterManuel d3
+alias sorterLoop d2
+alias sorterDistribution d3
 alias oreFillerIc d4
 alias manuelOut d5
-define selectionMemory 433257
+define selectionMemory 162644
 alias ingotHash r11
 alias amount r12
 alias totalAmount r13
@@ -98,19 +98,21 @@ beq r5 0 WaitForFinish
 j Loop
 Finish:
 sleep 5
+brlt r2 2 4
+or instruction potat 2
+put sorterLoop 0 instruction
+jr 3
+or instruction potat 1
+put sorterLoop 0 instruction
+
 l r0 manuelOut Setting
-breq r0 1 8
-breq r2 2 3
-or instruction potat 1
-jr 2
+breq r0 0 4
 or instruction potat 2
-put sorterLager 0 instruction
-put sorterManuel 0 instruction
-jr 5
-or instruction potat 2
-put sorterLager 0 instruction
+put sorterDistribution 0 instruction
+jr 3
 or instruction potat 1
-put sorterManuel 0 instruction
+put sorterDistribution 0 instruction
+
 s furnace Open 1
 yield
 l r0 furnace Reagents

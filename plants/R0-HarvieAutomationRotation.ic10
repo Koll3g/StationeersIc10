@@ -1,12 +1,12 @@
-define icTomato 123
-define icPotato 123
-define icCorn 123
-define icSoyBean 123
-define icWheat 123
-define icRice 123
-define icPumpkin 123
-define icCocoa 123
-define icSugarCane 123
+define icTomato 992280
+define icPotato 992278
+define icCorn 992300
+define icSoyBean 992298
+define icWheat 992311
+define icRice 992308
+define icPumpkin 992321
+define icCocoa 992324
+define icSugarCane 992327
 
 alias currentIc r15
 
