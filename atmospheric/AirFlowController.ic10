@@ -1,6 +1,28 @@
-define Sensor 322782515 #proxy Sensor
-define Licht 555215790 #Lichter
+# AirFlowController
+# Used for dynamically adjust the pressure difference of
+# of an active-vent-based pressured room. Higher difference higher flow.
+# Works best if input and output vents are on opposite sides
+# of a room.
+# The pressire difference is calculated based on CO2 rate
+# and Temperature difference between input and room.
 
+# ***** PARAMETER ***** #
+define roomSize 20 # in nr. of Big-Grid-Cubes
+define averageRoomPressure 100 # in kPa
+define maxPressureDiff 30 # in kPa
+define roomTemperatureUser 21 # in Celsius, used if not PAT is connected
+
+define occupancySensorName HASH("<sensor_name>")
+define lightsName HASH("<lights_name>")
+define airGasSensorName HASH("<air_gas_sensor_name>")
+define airVentsInName HASH("<air_vents_in_Name")
+define airVentsOutName HASH("<air_vents_out_Name")
+
+# ***** CONSTANTS ***** #
+define OCCUPANCY_SENSOR 322782515 #proxy Sensor
+define LIGHT 555215790 #Lichter
+
+# ***** VARIABLES ***** #
 alias patInputGas d0
 alias pDiffDisplay d1
 
@@ -19,49 +41,48 @@ alias roomTemperature r13
 alias numberOfOutVents r14
 alias numberOfInVents r15
 
-define RoomSize 140 # in nr. of Big-Grid-Cubes
-define AverageRoomPressure 100 # in kPa
-define MaxPressureDiff 30 # in kPa
-define RoomTemperatureUser 21 # in Celsius, used if not PAT is connected
+# ***** DEF END ***** #
 
-sbn -1129453144 HASH("AirVentIn") On 0
-sbn -1129453144 HASH("AirVentOut") On 0
+sbn -1129453144 airVentsInName On 0
+sbn -1129453144 airVentsOutName On 0
 
 Loop:
-lbn r0 Sensor HASH("Anwesenheit") Activate 1
+lbn r0 OCCUPANCY_SENSOR occupancySensorName Activate 1
 breq r0 lightState 3
 move lightState r0
-sbn Licht HASH("Wall Light (Long Wide)") On lightState
+sbn LIGHT lightsName On lightState
 
-sbn -1129453144 HASH("AirVentIn") Lock 1
-lbn numberOfInVents -1129453144 HASH("AirVentIn") Lock Sum
-sbn -1129453144 HASH("AirVentOut") Lock 1
-lbn numberOfOutVents -1129453144 HASH("AirVentOut") Lock Sum
+sbn -1129453144 airVentsInName Lock 1
+sbn -1129453144 airVentsInName Mode 1 
+lbn numberOfInVents -1129453144 airVentsInName Lock Sum
+sbn -1129453144 airVentsOutName Lock 1
+sbn -1129453144 airVentsOutName Mode 0 
+lbn numberOfOutVents -1129453144 airVentsOutName Lock Sum
 
-lbn roomCo2Ratio -1252983604 HASH("AirSensor") RatioCarbonDioxide Average
-lbn roomTemperature -1252983604 HASH("AirSensor") Temperature Average
+lbn roomCo2Ratio -1252983604 airGasSensorName RatioCarbonDioxide Average
+lbn roomTemperature -1252983604 airGasSensorName Temperature Average
 
 brdns patInputGas 3
 l inflowTemperature patInputGas Temperature
 jr 3
-move inflowTemperature RoomTemperatureUser
+move inflowTemperature roomTemperatureUser
 add inflowTemperature inflowTemperature 273
 
 mul r0 roomCo2Ratio 10000
 mul r1 r0 r0 # x^2
 mul r0 r1 r0 # x^3
-mul r0 r0 0.05 # 0.05x^3
-sqrt co2RatioMultiplier r0 # 0.05x^(3/2)
+sqrt r0 r0 # x^(3/2)
+mul co2RatioMultiplier r0 0.05 # 0.05x^(3/2)
 
 sub r0 roomTemperature inflowTemperature
 abs r0 r0 # absolute temp-diff
 mul r1 r0 r0 # x^2
 mul r0 r1 r0 # x^3
-mul r0 r0 0.75 # 0.75x^3
-sqrt temperatureMultiplier r0 # 0.75x^(3/2)
-add r0 temperatureMultiplier co2RatioMultiplier
+sqrt r0 r0 # x^(3/2)
+mul temperatureMultiplier r0 0.75 # 0.75x^(3/2)
+add r0 temperatureMultiplier co2RatioMultiplier # eventuell noch -1 (ansonsten 100% zu viel)
 
-mul r1 RoomSize 0.05
+mul r1 roomSize 0.05
 sqrt r1 r1 # sqrt(0.05x)
 
 mul r2 r0 r1 # temp, co2Ratio and roomsize
@@ -72,7 +93,7 @@ s pDiffDisplay Setting r2
 
 div r2 r2 2 # div by two -> +-
 
-div r0 MaxPressureDiff 2
+div r0 maxPressureDiff 2
 # cap at max +-maxPressureDiff
 brle r2 r0 2
 move r2 r0
@@ -81,18 +102,18 @@ div r0 1 numberOfInVents
 sqrt r1 numberOfInVents
 mul r0 r0 r1 # 1/x*sqrt(x)
 mul r3 r0 r2
-sub lowerRoomPressure AverageRoomPressure r3
+sub lowerRoomPressure averageRoomPressure r3
 
 div r0 1 numberOfOutVents
 sqrt r1 numberOfOutVents
 mul r0 r0 r1 # 1/x*sqrt(x)
 mul r3 r0 r2
-add upperRoomPressure AverageRoomPressure r3
+add upperRoomPressure averageRoomPressure r3
 
-sbn -1129453144 HASH("AirVentIn") PressureExternal lowerRoomPressure
-sbn -1129453144 HASH("AirVentOut") PressureExternal upperRoomPressure
-sbn -1129453144 HASH("AirVentIn") On 1
-sbn -1129453144 HASH("AirVentOut") On 1
+sbn -1129453144 airVentsInName PressureExternal lowerRoomPressure
+sbn -1129453144 airVentsOutName PressureExternal upperRoomPressure
+sbn -1129453144 airVentsInName On 1
+sbn -1129453144 airVentsOutName On 1
 
 yield
 sleep 1

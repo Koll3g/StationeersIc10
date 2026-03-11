@@ -1,5 +1,24 @@
 # GasMix Controller
 
+# ***** PARAMETER ***** #
+
+# Max VOut [m3] - Use max 0.01 for VP and 0.1 for TVP
+define vOut 0.01
+# Step of decreasing Vout based on max Vin
+define vStep 0.0005
+
+# Min Input pressure needed by both gases
+define minInputPressure 3000  # 3MPa
+# Max Output pressure stop after
+define maxOutputPressure 35000 # 35MPa
+
+# Ratio of gas1.. max 1!! (gas2 = 1-Gas1Ratio)
+div gas1Ratio 2 3
+
+# ***** CONSTANTS ***** #
+define R 8.314462
+
+# ***** DEVICES ***** #
 alias paGas1 d0
 alias paGas2 d1
 alias paOutput d2
@@ -7,27 +26,17 @@ alias vpGas1 d3
 alias vpGas2 d4
 alias switch d5
 
-define R 8.314462
-
-# Max VOut [m3] - Use max 0.01 for VP and 0.1 for TVP
-define Vout 0.01
-# Step of decreasing Vout based on max Vin
-define VStep 0.0005
-
-define MinInputPressure 3000
-define MaxOutputPressure 35000 # 35MPa
-
-alias CurrentVout r8
-alias Gas1Ratio r9
-alias Tout r10
-alias Pout r11
-alias nout r12
+# ***** VARIABLES ***** #
+alias currentVout r9
+alias TOut r10 # didn't bring myself to do lowercase T for Temp.
+alias pOut r11
+alias nOut r12
 alias n1 r13
 alias n2 r14
-alias V1 r15
+alias V1 r15 # same for Volume -> V
 alias V2 r16
 
-div Gas1Ratio 2 3
+# ***** DEF END ***** #
 
 Reset:
 s vpGas1 Setting 0
@@ -42,46 +51,47 @@ l r0 switch Setting
 beq r0 0 Reset
 l r0 paGas1 Pressure
 l r1 paGas2 Pressure
-sgt r0 r0 MinInputPressure
-sgt r1 r1 MinInputPressure
+sgt r0 r0 minInputPressure
+sgt r1 r1 minInputPressure
 and r2 r0 r1
 beq r2 0 Reset
 
 l r3 paOutput Pressure
-bgt r3 MaxOutputPressure Reset
+bgt r3 maxOutputPressure Reset
 
-move CurrentVout Vout
+move currentVout vOut
 RecalcWithLowerVout:
+
 # Calculate output Pressure
 l r0 paGas1 Pressure
 l r1 paGas2 Pressure
 mul r0 r0 1000
 mul r1 r1 1000
-move r5 Gas1Ratio
+move r5 gas1Ratio
 mul r3 r0 r5
 sub r4 1 r5
 mul r4 r4 r1
-add Pout r3 r4
+add pOut r3 r4
 
 # Calculate output Temperature
 l r0 paGas1 Temperature
 l r1 paGas2 Temperature
-move r5 Gas1Ratio
+move r5 gas1Ratio
 mul r3 r0 r5
 sub r4 1 r5
 mul r4 r4 r1
-add Tout r3 r4
+add TOut r3 r4
 
 # Calculate output moles
-mul r3 Pout CurrentVout
-mul r4 R Tout
-div nout r3 r4
+mul r3 pOut currentVout
+mul r4 R TOut
+div nOut r3 r4
 
 # Calculate moles for Gas1 and Gas2
-move r5 Gas1Ratio
-mul n1 nout r5
+move r5 gas1Ratio
+mul n1 nOut r5
 sub r4 1 r5
-mul n2 nout r4
+mul n2 nOut r4
 
 # Calculate Volume for Gas1
 l r0 paGas1 Temperature
@@ -92,8 +102,8 @@ mul r3 r3 r0
 div V1 r3 r1
 mul V1 V1 1000
 brle V1 10 5
-sub CurrentVout CurrentVout VStep
-ble CurrentVout 0 Reset
+sub currentVout currentVout vStep
+ble currentVout 0 Reset
 j RecalcWithLowerVout
 
 # Calculate Volume for Gas2
@@ -105,8 +115,8 @@ mul r3 r3 r0
 div V2 r3 r1
 mul V2 V2 1000
 brle V2 10 5
-sub CurrentVout CurrentVout VStep
-ble CurrentVout 0 Reset
+sub currentVout currentVout vStep
+ble currentVout 0 Reset
 j RecalcWithLowerVout
 
 # Set Volumes for Gases
