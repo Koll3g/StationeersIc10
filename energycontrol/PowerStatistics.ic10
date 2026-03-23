@@ -1,0 +1,49 @@
+define MEASUREQUANTITY 1200
+define PowerAnalyzer 1036015121
+define InputAnalyzer HASH("InputAnalyzer")
+define OutputAnalyzer HASH("OutputAnalyzer")
+define Memory -851746783
+define PowerProdMem HASH("PowerProdMem")
+define PowerConsMem HASH("PowerConsMem")
+define PowerBalMem HASH("PowerBalMem")
+define DISPLAY -815193061
+define DisplayName HASH("PowerBalance")
+
+alias count r15
+alias sumPowerProd r14
+alias actualPowerProd r13
+alias actualPowerCons r12
+alias sumPowerCons r11
+alias avgPowerProd r10
+alias avgPowerCons r9
+alias avgPowerBalance r8
+
+move count 0
+move sumPowerCons 0
+move sumPowerProd 0
+
+Main:
+lbn actualPowerProd PowerAnalyzer InputAnalyzer PowerPotential Maximum
+lbn actualPowerCons PowerAnalyzer OutputAnalyzer PowerActual Maximum
+add sumPowerProd sumPowerProd actualPowerProd
+add sumPowerCons sumPowerCons actualPowerCons
+add count count 1
+s db Setting count
+bge count MEASUREQUANTITY Final
+sleep 1
+j Main
+
+Final:
+div avgPowerProd sumPowerProd MEASUREQUANTITY
+div avgPowerCons sumPowerCons MEASUREQUANTITY
+sbn Memory PowerProdMem Setting avgPowerProd
+sbn Memory PowerConsMem Setting avgPowerCons
+sub avgPowerBalance avgPowerProd avgPowerCons
+sbn Memory PowerBalMem Setting avgPowerBalance
+sbn DISPLAY DisplayName Setting avgPowerBalance
+sbn DISPLAY DisplayName Color 1
+sbn DISPLAY DisplayName Mode 2
+move count 0
+move sumPowerCons 0
+move sumPowerProd 0
+j Main
