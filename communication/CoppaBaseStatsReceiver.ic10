@@ -1,0 +1,38 @@
+define TRANSMITTER -693235651
+define TransmitterName HASH("CoppaBaseStatsReceiver")
+define DISPLAY -53151617
+define DisplayName HASH("CoppaBaseStats")
+
+alias mask r15
+alias value r14
+alias mode r13
+alias color r12
+alias message r11
+alias previousMessage r10
+
+move message 0
+move previousMessage 0
+
+Main:
+lbn message TRANSMITTER TransmitterName Setting Average
+s db Setting message
+bneal message previousMessage DecodeMessage
+yield
+j Main
+
+DecodeMessage:
+move previousMessage message
+
+move mask $00000000000000FF
+and mode message mask
+
+move mask $FFFFFFFFFFFFFF00
+and value message mask
+sra value value 8
+
+sbn DISPLAY DisplayName Color 7
+sleep 0.01
+sbn DISPLAY DisplayName Mode mode
+sbn DISPLAY DisplayName Setting value
+sbn DISPLAY DisplayName Color 1
+j ra

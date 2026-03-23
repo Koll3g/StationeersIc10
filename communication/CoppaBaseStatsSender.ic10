@@ -1,0 +1,82 @@
+define TRANSMITTER -693235651
+define TransmitterName HASH("CoppaBaseStatsTransmitter")
+define DISPLAY -53151617
+define DisplayName HASH("CoppaBaseStats")
+define MEMORY -851746783
+define MemoryPowerBal HASH("PowerBalMem")
+define SILO 1155865682
+define VENDINGMACHINE -443130773
+define LOADER 94539235
+
+alias mask r15
+alias value r14
+alias mode r13
+alias message r12
+
+alias vendingHash r11
+alias siloHash r10
+alias loaderHash r9
+
+Main:
+move value STR("POWER")
+move mode 10
+jal EncodeMessageAndSend
+lbn value MEMORY MemoryPowerBal Setting Average
+move mode 2
+jal EncodeMessageAndSend
+move value STR("COPPA")
+move mode 10
+jal EncodeMessageAndSend
+move vendingHash HASH("Copper (VM)")
+move siloHash HASH("Silo Copper")
+move loaderHash HASH("Loader Copper")
+jal ReadItemCount
+jal EncodeMessageAndSend
+move value STR("IRON")
+move mode 10
+jal EncodeMessageAndSend
+move vendingHash HASH("Iron (VM)")
+move siloHash HASH("Silo Iron")
+move loaderHash HASH("Loader Iron")
+jal ReadItemCount
+jal EncodeMessageAndSend
+move value STR("SILIC")
+move mode 10
+jal EncodeMessageAndSend
+move vendingHash HASH("Silicon (VM)")
+move siloHash HASH("Silo Silicon")
+move loaderHash HASH("Loader Silicon")
+jal ReadItemCount
+jal EncodeMessageAndSend
+move value STR("BCKPK")
+move mode 10
+jal EncodeMessageAndSend
+lbn value SILO HASH("Silo Mining Backpack") Quantity Average
+move mode 0
+jal EncodeMessageAndSend
+j Main
+
+EncodeMessageAndSend:
+move message value
+sll message message 8
+or message message mode
+sbn TRANSMITTER TransmitterName Setting message
+sbn DISPLAY DisplayName Color 7
+sleep 0.01
+sbn DISPLAY DisplayName Mode mode
+sbn DISPLAY DisplayName Setting value
+sbn DISPLAY DisplayName Color 1
+sleep 2
+j ra
+
+ReadItemCount:
+lbn r0 VENDINGMACHINE vendingHash Quantity Average
+mul r0 r0 24
+lbn r1 SILO siloHash Quantity Average
+add r0 r0 r1
+lbns r2 LOADER loaderHash 1 FreeSlots Average
+sub r2 24 r2 
+add r0 r0 r2
+move value r0
+move mode 0
+j ra
