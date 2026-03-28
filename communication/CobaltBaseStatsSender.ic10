@@ -1,7 +1,7 @@
 define TRANSMITTER -693235651
-define TransmitterName HASH("CoppaBaseStatsTransmitter")
+define TransmitterName HASH("CobaltBaseStatsTransmitter")
 define DISPLAY -53151617
-define DisplayName HASH("CoppaBaseStats")
+define DisplayName HASH("CobaltBaseStats")
 define MEMORY -851746783
 define MemoryPowerBal HASH("PowerBalMem")
 define SILO 1155865682
@@ -28,12 +28,20 @@ move mode 2
 jal EncodeMessageAndSend
 blt value 100 LoopPowerLow
 
-move value STR("COPPA")
+move value STR("COBLT")
 move mode 10
 jal EncodeMessageAndSend
-move vendingHash HASH("Copper (VM)")
-move siloHash HASH("Silo Copper")
-move loaderHash HASH("Loader Copper")
+move vendingHash HASH("Cobalt (VM)")
+move siloHash HASH("Silo Cobalt")
+move loaderHash HASH("Loader Cobalt")
+jal ReadItemCount
+jal EncodeMessageAndSend
+move value STR("NICKL")
+move mode 10
+jal EncodeMessageAndSend
+move vendingHash HASH("Nickel (VM)")
+move siloHash HASH("Silo Nickel")
+move loaderHash HASH("Loader Nickel")
 jal ReadItemCount
 jal EncodeMessageAndSend
 move value STR("IRON")
@@ -42,30 +50,6 @@ jal EncodeMessageAndSend
 move vendingHash HASH("Iron (VM)")
 move siloHash HASH("Silo Iron")
 move loaderHash HASH("Loader Iron")
-jal ReadItemCount
-jal EncodeMessageAndSend
-move value STR("SILIC")
-move mode 10
-jal EncodeMessageAndSend
-move vendingHash HASH("Silicon (VM)")
-move siloHash HASH("Silo Silicon")
-move loaderHash HASH("Loader Silicon")
-jal ReadItemCount
-jal EncodeMessageAndSend
-move value STR("SILVR")
-move mode 10
-jal EncodeMessageAndSend
-move vendingHash HASH("Silver (VM)")
-move siloHash HASH("Silo Silver")
-move loaderHash HASH("Loader Silver")
-jal ReadItemCount
-jal EncodeMessageAndSend
-move value STR("LEAD")
-move mode 10
-jal EncodeMessageAndSend
-move vendingHash HASH("Lead (VM)")
-move siloHash HASH("Silo Lead")
-move loaderHash HASH("Loader Lead")
 jal ReadItemCount
 jal EncodeMessageAndSend
 

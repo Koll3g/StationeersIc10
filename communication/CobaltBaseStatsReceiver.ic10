@@ -1,7 +1,7 @@
 define TRANSMITTER -693235651
-define TransmitterName HASH("CoppaBaseStatsReceiver")
+define TransmitterName HASH("CobaltBaseStatsReceiver")
 define DISPLAY -53151617
-define DisplayName HASH("CoppaBaseStats")
+define DisplayName HASH("CobaltBaseStats")
 
 alias mask r15
 alias value r14
